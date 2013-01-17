@@ -2,6 +2,9 @@ package com.verhas.workflow;
 
 import java.util.Map;
 
+import javax0.wtf.Action;
+import javax0.wtf.Condition;
+
 /**
  * A sample condition that retrieves the parameter
  * {@code genericActionParameterName} and asserts that it is

@@ -2,6 +2,10 @@ package com.verhas.workflow;
 
 import java.util.Map;
 
+import javax0.wtf.Action;
+import javax0.wtf.PostFunction;
+import javax0.wtf.Result;
+
 /**
  *
  * @author Peter Verhas
