@@ -1,0 +1,214 @@
+      ---
+      Workflow in five minute
+      ---
+Workflow in five minute
+
+ This page describes in five minutes some more details of the workflow after you
+have read {{{workflow.html}workflow in one minute}}.
+
+Workflow and definitions
+
+ The workflow interface contains Java interfaces for <<<Workflow>>>,
+<<<Step>>>, <<<Action>>> and <<<Result>> and their defining counterparts
+<<<WorkflowDefinition>>>,<<<StepDefinition>>>, <<<ActionDefinition>>> and
+<<<ResultDefinition>>. The definitions define the structure of the workflow and
+the actual elements <<<Workflow>>>, <<<Step>>>, <<<Action>>> and <<<Result>>
+execute the workflow. For each <<<Workflow>>> there is a
+<<<WorkflowDefinition>>>. <<<Workflow>>s are instances of a
+<<<WorkflowDefinition>>>.
+
+[images/definitions.png]
+
+ For each <<<xxx>>> there is a <<<xxxDefinition>>> when a workflow is executed
+and for each <<<xxxDefinition>>> that exists in a <<<WorkflowDefinition>>>
+there is an <<<xxx>>> in each <<<Workflow>>>. (Although implementations
+may allocate some of the objects on demand.)
+
+Workflow elements
+
+ Steps and results are simple things. They have a name and more or less that is
+it. When you program a workflow you do not really need to care more than that.
+Actions, however are a bit more complex.
+
+ An 'action' performs something as the name implies. If this is only to transfer
+a workflow from one step to another then you need not program. In that
+case the workflow definition will describe all that the 'action' does, but
+that is not much use. If the 'action' is really meant to do something then
+you can program a bit of Java.
+
+ Each action may contain functions:
+
+   * condition
+
+   * pre-function
+
+   * validator
+
+   * post-function
+
+   []
+
+   The <<condition>> decides when an action can be executed. This is an extra
+check when the workflow is in a certain step. Using conditions you can
+programmatically filter some of the transitions (actions) from one step to other
+steps. A <<<condition>>> should return <<<true>>> if the action can be executed.
+The code of the
+condition should not alter the internal state of the workflow. Generally the
+execution of a condition should examine things and should not alter anything.
+
+   The <<pre-function>> should perform everything needed to execute the
+the action, but it should not alter the state of the workflow. This is
+usually the code used to create the "user input" forms that are needed to
+perform an action if such user input is required.
+
+   The <<validator>> should check that the pre-function and other codes that were
+executed resulted a proper build-up to execute the final code of the action.
+The validator is usually used to check the validity of the user input. If the
+validator returns false then the action is aborted and the workflow remains
+in the step(s) where it was.
+
+   The <<post-function>> is called if the validator returns true. The post-function
+performs the actual modification in the system that has to be performed during 
+the transition between the states. The post-function returns a <<<Result>>>
+that will help the work flow engine to determine the next step(s) the work
+flow will be in.
+
+WorkflowDefinition
+
+ Now that we know that 'actions' are not atomic but are rather composed by
+condition, prefunction, validator and postFunction we should see a sample
+workflow definition.
+
+ <<<WorkflowDefinition>>> is a structure in the memory of the JVM and CVW
+only assumes that there is some class that implements the interface
+<<<WorkflowBuilder>>> and somehow creates the <<<WorkflowDefinition>>>.
+Even though
+there is a simple implementation of the interface in the package that reads XML
+and and produces <<<WorkflowDefinition>>>. This is called <<<ConfigurationBuilder>>>
+and  it uses the Apache Commons Configuration package to read the XML.
+(Later version may also deliver other builders, or you can write your own builder.)
+
+ To get rid of being abstract we will use the XML format of the workflow
+definition that can be read by the supplied builder. After all: most of the
+applications will use this builder anyway.
+
+ Here is a sample workflow definition.
+
+--------------------------------------------------------------------------------
+<workflow start="initialStep">
+  <actions>
+    <action name="start"
+            condition="com.verhas.workflow.SampleCondition"
+            preFunction="com.verhas.workflow.SamplePreFunction"
+            validator="com.verhas.workflow.SampleValidator"
+            postFunction="com.verhas.workflow.SamplePostFunction">
+              <parameter name="genericActionParameterName"
+              value="genericActionParameterValue"/>
+    </action>
+    <action name="cutOff"
+            condition="com.verhas.workflow.SampleCondition"/>
+    <action name="finish"
+            condition="com.verhas.workflow.SampleCondition"/>
+  </actions>
+
+  <steps>
+    <step name="initialStep">
+      <actions>
+        <action name="start">
+          <parameter name="scriptLanguage" value="groovy"/>
+          <parameter name="script">myGroovyScript.groovy</parameter>
+          <result name="OK">
+            <step>secondStep</step>
+          </result>
+          <result name="FAILED">
+            <step>thirdStep</step>
+            <step>step4</step>
+          </result>
+        </action>
+        <action name="cutOff"/>
+        <action name="finish"/>
+      </actions>
+    </step>
+    <step name="secondStep">
+      <actions>
+        <action name="finish">
+          <result name="OK">
+            <step>step4</step>
+            <step>thirdStep</step>
+          </result>
+        </action>
+      </actions>
+    </step>
+    <step name="thirdStep"/>
+    <step name="step4" />
+  </steps>
+</workflow>
+--------------------------------------------------------------------------------
+
+ This is a very simple workflow not much of use. It was originally crafted to test
+a bit the simple implementation of CVW. There is one benefit compared to a real
+workflow: it is short. To have a better overwiev of it here is the graphical
+representation of the same workflow definition:
+
+[images/sample.png]
+
+ As you can see the workflow has two major parts:
+
+ * actions
+
+ * steps
+
+[]
+
+ As you can also see the XML tag <<<actions>>> contains many <<<action>>><s>
+and similarly the XML tag <<<steps>>> contains many <<<step>>><s>. Each of the
+actions and the steps is named, and their order in the XML file is not
+important.
+
+ An action may have a <<<condition>>>, a <<<preFunction>>>, a <<<validator>>>
+and a <<<postFunction>>>. Together we call them action functions. 
+In the XML definition these are defined as tag
+attributes and should name the class that implements the code of each. None of
+the listed elements are mandatory. If there is no <<<condition>>> defined then
+the action is treated unconditional: if the action is listed for a certain
+step, then it can be executed. If there is no <<<validator>>> then the
+post function will be executed without further checks when it is due.
+
+ In addition to the java classes an action may have parameters. These are
+defined in the tag <<<parameter>>>. An action may have many parameters. These
+parameters may be used to alter the behaviour of the action. The action
+functions can access these parameters through method parameters. The workflow
+itself does not use these parameters.
+
+ In the sample you can see that there are parameters for actions where the
+action is defined and also in the step where it is used. The parameters when
+passed to the action function are merged and stored in a <<<Map>>>. When the
+same action is called in different steps during the workflow the parameters
+may be different. It is a good practice to write the parameters that are the
+same for all the steps into the action parameter where the action is defined.
+The parameters that are step specific should be written to the action where
+it is used in the step.
+
+ Still there is one point to explain. The file starts with the tag
+<<<workflow>>> and it has an attribute <<<start>>>:
+
+--------------------------------------------------------------------------------
+<workflow start="initialStep">
+    . . .
+  <steps>
+    <step name="initialStep">
+      . . .
+    </step>
+    . . .
+  </steps>
+</workflow>
+--------------------------------------------------------------------------------
+
+
+ This attribute gives the name of the step where a workflow is, when it starts.
+Even though a workflow can be in more than one step at a time (see
+{{more_than_one_step.html}}) there can be only one start step, and it has to be
+defined.
+
+ It is time to have a look at some sample application that is based on this
+workflow. {{sample.java.html}}

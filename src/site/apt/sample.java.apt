@@ -1,0 +1,215 @@
+      ---
+      Workflow Sample Application
+      ---
+
+Workflow Sample Application
+
+ This page lists and describes a sample application that uses the CVW workflow
+and the simple implementation of it. The code listed here actually works, but do
+not expect a real life example. The sample here was created as a unit test and
+also to demonstrate the use of CVW SimpleWorkflow implementation.
+
+ To have a real world example how to embed CVW workflow you may have a look at
+the source code of Groowiki.
+
+ This code executes the workflow that is described in detail on the page
+{{workflow5.html}Workflow in five minute}}. The digram of the workflow is:
+
+[images/sample.png]
+
+ The unit test code <<<ConfigBuilderTest.java>>> contains the following code:
+
+--------------------------------------------------------------------------------
+  1. ConfigurationFactory cf = new ConfigurationFactory("config.xml");
+  2. Configuration conf = cf.getConfiguration();
+  3. ConfigBuilder cb = new ConfigBuilder();
+  4. cb.setConfiguration(conf);
+  5. WorkflowEngine workflowEngine = new SimpleWorkflowEngine();
+  6. WorkflowDefinition wd = cb.build(workflowEngine);
+  7. SimpleWorkflow sw = new SimpleWorkflow();
+  8. sw.setDefinition(wd);
+  9. Step[] steps = sw.getSteps();
+ 10. Step step = steps[0];
+ 11. ActionDefinition[] actionDefinitions
+         = step.getDefinition().getActionDefinitions();
+ 12. Action[] actions = step.getActions();
+ 13. Action action = actions[0];
+ 14. Map<String, String> params = action.getParameters();
+ 15. Object trans = action.performPre();
+ 16. action.performPost(trans, null);
+ 17. steps = sw.getSteps();
+ 18. step = steps[0];
+ 19. actions = step.getAllActions();
+ 20. action = actions[0];
+ 21. action.perform();
+ 22. steps = sw.getSteps();
+--------------------------------------------------------------------------------
+
+ Since this is pretty long to we will examine the code piece by piece. In the
+fragments below we will see the same lines as above however at some places
+we also list the unit test assertions to aid understanding. The original
+unit test code also contains comments, but those would be pointless here.
+
+Load Definition
+
+ Here come the first few lines:
+
+--------------------------------------------------------------------------------
+  1. ConfigurationFactory cf = new ConfigurationFactory("config.xml");
+  2. Configuration conf = cf.getConfiguration();
+  3. ConfigBuilder cb = new ConfigBuilder();
+  4. cb.setConfiguration(conf);
+  5. WorkflowEngine workflowEngine = new SimpleWorkflowEngine();
+  6. WorkflowDefinition wd = cb.build(workflowEngine);
+--------------------------------------------------------------------------------
+
+ The XML definition of the workflow is read using the Apache Commons
+Configuration library, hence the name <<<ConfigBuilder>>>. We need a
+configuration file (lines 1, 2) and then a <<<ConfigBuilder>>> (line 3).
+We set the configuration for the configuration builder and we create a
+<<<WorkflowEngine>>>.
+
+Workflow Engine
+
+ This engine is used by the implementation to manage the
+a set of workflows that belong "together". Unless you want to create your
+own implementation of the CVW workflow API you need not care more about
+<<<WorkflowEngine>>> than to create one in your code and pass it to the
+builder. And, oh... do not be surprised when the different workflows even
+using different workflow definitions will run the same instance of an action
+function class. In simple implementation of <<<WorkflowEngine>>> those classes
+are singletons in the scope of an engine.
+
+Instantiate Workflow
+
+ This first part of the code was used to load the
+workflow definition. To execute it we will need a <<Workflow>> object.
+
+--------------------------------------------------------------------------------
+  7. SimpleWorkflow sw = new SimpleWorkflow();
+  8. sw.setDefinition(wd);
+--------------------------------------------------------------------------------
+
+ To create a workflow object we have to instantiate it (obvious). The original
+<<<Workflow.java>>> is an interface, therefore we need an implementation of it.
+Some implementations may provide factory methods. The default implementation
+<<<SimpleWorkflow>>> does not. You should use <<<new SimpleWorkflow()>>> to get
+a new instance and then set the workflow definition so that the object knows
+what workflow rules to follow when it is executed.
+
+Select and execute action
+
+ In the next piece of code we will execute one action in the workflow:
+
+--------------------------------------------------------------------------------
+  9. Step[] steps = sw.getSteps();
+     assertEquals(1, steps.length);
+     assertEquals("initialStep", steps[0].getName());
+ 10. Step step = steps[0];
+ 11. ActionDefinition[] actionDefinitions
+         = step.getDefinition().getActionDefinitions();
+     assertEquals(3, actions.length);
+ 12. Action[] actions = step.getActions();
+     assertEquals(1, actions.length);
+ 13. Action action = actions[0];
+ 14. Map<String, String> params = action.getParameters();
+ 15. Object trans = action.performPre();
+ 16. action.performPost(trans, null);
+--------------------------------------------------------------------------------
+
+ To execute an action we have to select it. There can be several actions
+available to execute. It is up to the embedding application to select one.
+To do so first we have to select a step and then an action which is available
+for execution from that step.
+
+ The line 9 gets the steps the workflow is currently in. The workflow was just
+started and therefore it is in the start step as defined in the XML. Because
+of this the array <<<Step[] steps>>> will contain only one element. This is
+the <<<step>>> we get in line 10 and it is called <<<initialStep>>>. (Actually
+the <<<StepDefinition>>> has the name <<<initialStep>>> not the step, but this
+little sloppyness is forgivable since there is only one step instance for each
+step definition in a workflow instance.)
+
+ When we have selected the step <<<step>>> then we can get the actions that can
+be execeuted from that step. We get it in two different ways in lines 11 and 12.
+As you can see from the assertions listed here we get two different results. On
+line 11 we get all the action definitions for the actions that can ever be
+executed from step <<<step>>>. On line 12 we get the subset for which the
+<<<Condition>>> of the action returned true. You can see that there are three
+actions from <<<initialStep>>> that are <start>, <cutOff> and <finish> but only
+one can be executed. This is because all three actions bear the <<<Condition>>>
+named <<<SampleCondition>>> and this condition is implemented so that the method
+<<<canBeExecuted()>>> returns with the line:
+
+--------------------------------------------------------------------------------
+    return action.getDefinition().getName().equals("start");
+--------------------------------------------------------------------------------
+
+ This will return <<<true>>> only if the action is <<<start>>> and <<<false>>>
+otherwise. Because of it the variable <<<action>>> in line 13 will be the
+action named 'start'.
+
+ On line 14 we read the action parameters for the shake of demonstration only.
+To execute an action the embedding program need not call this method.
+
+ On line 15 the program calls the method <<<performPre>>>, which gathers the
+action parameters, gets the <<<preFunction>>> configured for the action in the
+workflow definition and it it exists calls the <<<PreFunction>>> object's
+method named <<<preFunction>>>.
+
+ This method will return an object that CVW calls 'transient object'. This can
+be used to store values that are needed during the execution of an action.
+The pre function should return this object and the action's post function will
+get this object as an argument.
+
+ The next line calls the method <<<performPost>>>. The last argument is a
+<<<Map>>> which usually holds the user input that was entered by the
+interactive user between the pre and post part of the action. In this sample
+this is <<<null>>> as we did not display any form for any user to fill in and
+thus we do not have any user input.
+
+--------------------------------------------------------------------------------
+ 16. action.performPost(trans, null);
+--------------------------------------------------------------------------------
+
+ This method calls the validator if it was configured. If the validator fails
+then the method throws <<<ValidatorFailedException>>>. Otherwise if no
+validator is configured or the validator returned <<<true>>> then the
+configured <<<PostFunction>>>'s method <<<postFunction>>> is called. After the
+<<<postFunction>>> returned some <<<Result>>> the workflow is transitioned to
+the new states as configured in the workflow definition. For more
+information on how this transition is performed read {{more_than_one_step.html}}.
+
+ When there is no need for any user input the separation of the pre and post
+phase of an action is not neccesary. In such a case the program can call
+the method <<<perform()>>>. This is a complimentary method that is as simple
+as
+
+--------------------------------------------------------------------------------
+  public Step[] perform() throws ValidatorFailedException,
+          ClassNotFoundException,
+          InstantiationException,
+          IllegalAccessException {
+    Object transientObject = performPre();
+    return performPost(transientObject, null);
+  }
+--------------------------------------------------------------------------------
+
+ in simple workflow. The rest of the lines actually call this method.
+
+--------------------------------------------------------------------------------
+ 17. steps = sw.getSteps();
+ 18. step = steps[0];
+ 19. actions = step.getAllActions();
+ 20. action = actions[0];
+ 21. action.perform();
+ 22. steps = sw.getSteps();
+--------------------------------------------------------------------------------
+
+ Line 17 to 20 repeat what we did in lines 9 to 13 and then calls the method
+<<<perform()>>>.
+
+ There is one important issue that is missing in this sample. Workflow
+{{{persistence.html}persistence}}. If you want to embed CVW into an application
+that is stopped and restarted and needs long running workflows, then you need
+to implement persistence. Not a big deal though, do not be afraid, read on.

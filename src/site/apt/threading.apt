@@ -1,0 +1,20 @@
+  ---
+  Threading
+  ---
+
+Threading
+
+Single Thread of Flow
+
+ A single workflow should run on a single thread. That comes not only from the
+coding of CVW but also from the workflow design. Imagine the situation that an
+action is transitioning from one step and another is transitioning from another
+step or from the same step. It could mix up the workflow totally and the final
+result would depend on the execution order of the different threads (racing).
+
+Multi-thread Action Functions
+
+ Action functions should be multi thread. When an action function (conditions,
+prefunctions, validators and postfunctions) is neede the simple implementation
+of the API instantiates an object and registers it in the workflow engine. The
+engine next time uses the same instance for the same class.

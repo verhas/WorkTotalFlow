@@ -1,0 +1,137 @@
+   ---
+   Workflow in more than one step
+   ---
+
+Workflow in more than one step
+
+ A workflow transitions from steps to step. When a workflow is in a step and
+performs an action it gets into another step.
+
+ In reality workflows are not that simple. Real life workflows need parallel
+paths, forks of execution and joins. Most workflow implementations support such
+feature and CVW does nothing less.
+
+ Imagine a workflow that implements the approval process of an expense. Boring
+stuff, but fits the purpose and after all almost all workflow tutorials talk
+about this use case. To aid your concentration imagine that you want to get some
+tech geek fancy stuff on your desk, like a new notebook, or touch screen phone
+or whatever. The way to get your wanted toy are the followings:
+
+ * Create a new request form and the workflow along with it. (The second should
+be more or less automatic.)
+
+ * Your boss has to approve it: he agrees with you and also believes that you
+need this and your getting this new toy will boost your performance and is in
+line with the interest of the shareholders.
+
+ * IT department has to approve it. They have to be sure that your using the
+tool is not against the security of the company, will not ruin the intranet and
+will not consume all their support resources to reset the tool from day to day.
+
+ * Purchasing dept has to approve it. They ensure that the stuff is available on
+the market, they can purchase it, and ensure that the purchase procedure is
+totally in line with the regime of the company and the law. (Your stuff is not
+a fake branded toy manufatured using child labour and smuggled into the country.)
+
+ * Finance dept. has to ensure that there is enough budget and cash for the
+expense.
+
+ * CEO also has to approve it after all departments aproved.
+
+[]
+
+ The approval process should go parallel, otherwise it would take such a long
+time that your toy will end up in the technology museum of the company on the
+corridor along with the first ZX Spectrum the company purchased. Therefore
+the steps the workflow should implement could be the followings:
+
+ * Initiated.
+
+ * Waiting for
+
+  ** Boss approval
+
+  ** IT approval
+
+  ** Purchasing approval
+
+  ** Finance approval
+
+ * Approved by
+
+  ** BOSS
+
+  ** IT
+
+  ** Purchasing
+
+  ** Finance
+
+ * Disapproved
+
+ * Approved by CEO
+
+[]
+
+ This is 11 steps all together. Described as a picture:
+
+[images/purchase.png]
+
+ In this workflow when you start the purchase approval the start step is
+<<<Initiated>>>. When you execute the action <request for approval> this
+step is replaced by four other steps:
+
+ * Waiting for Boss approval
+
+ * Waiting for IT approval
+
+ * Waiting for Purchasing approval
+
+ * Waiting for Finance approval
+
+[]
+
+ After that the workflow goes on its way. The boss may select <boss approve>
+or <disaprove>. Similarly IT, purchase anf finance can do the same. These
+actions do not effect the other states. If boss approves your request the
+new set of state will be
+
+ * Approved by BOSS
+
+ * Waiting for IT approval
+
+ * Waiting for Purchasing approval
+
+ * Waiting for Finance approval
+
+[]
+
+ When all departments approved the request then CEO can approve it and move it
+to step <Approved by CEO>. Details how to implement a join see
+{{{implementing_join.html}implementing joins}}.
+
+Formal
+
+ A workflow is in a set of steps. The set is a subset of the set of steps
+defined in the workflow definition. The set can not contain a step more than
+one.
+
+ When a workflow is transitioned from a step set to another via an action the
+new set of steps is calculated as the following:
+
+ * The original set of steps is <<<S = ( s_1, s_2, ..., s_k, ... , s_n )>>>.
+
+ * The action <<<a>>> to be performed belongs to <<<s_k>>>.
+
+ * The action performs and the postFunction returns the result <<<r>>>.
+
+ * The result <<<r>>> after executing action <<<a>>> from the step <<<s_k>>>
+targets the step set <<<T = ( t_1, t_2, ... , t_m)>>>. This is configured in the
+workflow definition.
+
+ * The step set after the action was executed will be <<<S \\ (s_k) U T>>>. In
+other words the set that contains all steps that are in the set <<<S>>> minus
+the step <<<s_k>>> and united with the target step set <<<T>>>.
+
+[]
+

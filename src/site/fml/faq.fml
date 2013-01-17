@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<faqs title="Frequently Asked Questions" toplink="false">
+
+    <part id="general">
+        <title>General</title>
+
+        <faq id="what-is">
+            <question>What is CVW?</question>
+            <answer>
+                <p>
+CVW is a workflow engine that can be embedded into Java applications. It aims
+to be the simplest workflow engine with very clean interface and easy to
+embed and extend.
+                </p>
+            </answer>
+        </faq>
+        <faq id="name">
+            <question>Where does the name CVW comes from?</question>
+            <answer>
+CVW stands for com.verhas.workflow, which is the
+package name of the interfaces.
+            </answer>
+        </faq>
+        <faq id="parameters">
+            <question>How can I pass an object from the framework to a function</question>
+            <answer>
+
+            </answer>
+        </faq>
+    </part>
+</faqs>

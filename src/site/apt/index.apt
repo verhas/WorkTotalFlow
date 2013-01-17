@@ -1,0 +1,57 @@
+           ---
+        Com.Verhas.Workflow
+           ---
+
+Introduction
+
+ Com.Verhas.Workflow (CVW) is a workflow implementation to be used as a library
+in Java programs. CVW aims to implement the features and functions that are the
+very basic features of a workflow.
+
+ CVW is most suited to applications that need workflow with user
+interaction. A workflow runs through screens where the user gives input, selects
+what to do and the workflow runs transferring the state of the application from
+one state to another.
+
+ What CVW defines are:
+
+ * api to define a workflow (<<<WorkflowDefinition>>>)
+
+ * create workflow instance that can be executed
+
+ * set the state information of a workflow instance
+
+ * run single step of execution of a workflow
+
+ * get the state information of a workflow
+
+ * have steps, actions, conditions, validators, results, pre functions and
+post functions in workflow
+
+[]
+
+ Along with the definition of this structure you can also get a simple
+implementation of the CVW interface that delivers out of the box workflow
+functionality for you including and XML based worfklow definition parser.
+
+ * {{{workflow.html}Workflow in one minute}} basic elements of a workflow in
+CVW
+
+ * {{{workflow5.html}Workflow in 5 minutes}} a bit more detailed
+
+ * {{{sample.java.html}A sample use}} of CV Workflow
+
+ * {{{more_than_one_step.html}More than one step}} describes a bit more detailed
+how step transition occures and how a workflow can be in more than one step
+at a time.
+
+ * {{{implementing_join.html}Details on how to implement joins}} where a workflow
+goes from parallel execution to single thread gain (as opposed to forking).
+
+ * {{{persistence.html}Implementing persistence}} for long running workflows
+
+ * {{{workflowengine.html}Role of workflow engine}}
+
+ * {{{threading.html}Handling multi thread environment}}
+
+ * {{{transaction.html}Transactions in CVW}}

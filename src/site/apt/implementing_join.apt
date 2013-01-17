@@ -1,0 +1,153 @@
+  ---
+  Implementing a Join in CV Workflow
+  ---
+
+Implementing a Join in CV Workflow
+
+ Implementing a fork is very simple in CVW: a result has to be assigned to
+more than one target step. Fork will automatically occure. Join however is
+not that simple, because it not that well defined. A simple join can look
+something like this:
+
+[images/simplejoin.png] simple join
+
+ In this case the action can be performed on the condition that the workflow
+is in the steps <step 1>, <step 2> and <step 3>. However not all joins
+are that simple. Consider the following situation:
+
+[images/complexjoin.png] complex join
+
+ The action can be performed on the condition that the workflow is in the
+steps <step 1>, <step 2> and <step 3>. Or wait. Perhaps <step 3> will transition
+first to <step 2>. In that case the condition is that the workflow is in
+steps <step 1> and <step 2>. It depends on what you want to implement and it is
+very difficult to write all the possible conditions in a workflow. Such a
+definition notation would either be very limited or very complex, or as a worst
+case: both.
+
+ For this reason when we designed CVW we desided to leave the implementation of
+joins up to the workflow actions and CVW provides API good enough so that this
+is not an enormous task.
+
+ Implementing a join there are two major tasks:
+
+ * Decide if the joining action can be executed.
+
+ * Join the multiple steps into one target step.
+
+[]
+
+ We will see how to implement these two tasks using <<<Condition>>> and
+<<<PostFunction>>> classes.
+
+Decision
+
+ A <<<Condition>>> is executed before an action is selected for execution.
+Simple Workflow will execute an action even if the condition of it is false
+though. It is the "responsibility" of the application that uses CVW implementation
+to check that the action can be executed but CVW gives helping hands.
+The simplest solution is to call
+
+--------------------------------------------------------------------------------
+ 12. Action[] actions = step.getActions();
+--------------------------------------------------------------------------------
+
+ where <<<step>>> is a <<<Step>>> object that the workflow is currently in
+object. This method will call all conditions and
+will return an array of actions for which the conditions are <<<true>>>.
+
+ The <<<condition>>> interface to be implemented is very simple:
+
+--------------------------------------------------------------------------------
+package com.verhas.workflow;
+public interface Condition extends Function {
+  public boolean canBePerformed(Action action);
+}
+
+--------------------------------------------------------------------------------
+
+ The method <<<canBePerfomed>>> has to be implemented and if it returns <<<true>>>
+as the name says: the action can be performed. The argument to this method is
+the <<<action>>> to be executed.
+
+ A <<<Condition>>> can have a look at what steps the workflow is currently in.
+This is because the method <<<caBePerformed>>> gets the action as a parameter
+as it can call:
+
+--------------------------------------------------------------------------------
+    Step [] steps = action.getStep().getWorkflow().getSteps();
+--------------------------------------------------------------------------------
+
+ The method <<<getStep()>>> returns the <<<Step>>> that the action was
+started from, <<<getWorkflow()>>> will return the workflow instance. This way
+the method can get access to the <<<Workflow>>> object and query the array of
+steps that the workflow is currently in.
+
+ Based on this the condition can decide whether the action can be executed or
+not.
+
+
+Merging Steps
+
+ Deciding that the action can be executed is one issue. We solved that in the
+previous section. However if the action is simply executed from a step then only
+that step will be replaced by the target step<s>. For example if the workflow is in
+steps <step 1>, <step 2> and <step 3> and we execute the action 'action' from
+<step 1> then the resulting step set will be <target step>, <step 2> and
+<step 3>. What we expect is to be in step <target step> only.
+
+ To implement that the <<<PostFunction>>> of the action has to remove the source
+steps <step 2> and <step 3> from the workflow so that the resulting
+<target step> will replace <step 1> and remain as the only step. To do that
+easily the implementation of <<<Action>>> provides two methods:
+
+ * <<<join(Step[] steps)>>> and
+
+ * <<<join(String[] steps)>>>
+
+[]
+
+ The first one can be used in programs where you have the actual step objects
+to join available in your code. The second one is a handy version that eases
+your job when you have only the names of the steps at hand.
+
+ The <<<PostFunction>>> interface
+
+--------------------------------------------------------------------------------
+package com.verhas.workflow;
+import java.util.Map;
+public interface PostFunction extends Function {
+    public Result postFunction(
+            Action action,
+            Object transientObject,
+            Map<String, String> userInput);
+}
+--------------------------------------------------------------------------------
+
+ defines the method <<<postFunction>>> that gets the <<<action>>> as an
+argument and therefore can call any version of the method <<<join()>>>.
+
+--------------------------------------------------------------------------------
+    action.join(stepNamesToJoin);
+--------------------------------------------------------------------------------
+
+ The argument of the join is an array of the steps (or their names) that have
+to be removed from the set of steps before the transition is performed by the
+workflow engine. In out example it means that the actual call would be
+
+--------------------------------------------------------------------------------
+    action.join( new String[] { "step 2", "step 3" });
+--------------------------------------------------------------------------------
+
+ What you really want is to join <step 1>, <step 2> and <step 3>. Should the
+implementation really care which step the action was started? The answer is: no.
+You can safely list all the steps that will be joined so it is exactly as good
+
+--------------------------------------------------------------------------------
+    action.join( new String[] { "step 1", "step 2", "step 3" });
+--------------------------------------------------------------------------------
+
+ The difference is that in the first case the transition will replace <step 1>
+with the step <target step> while in the second case it will insert the step
+<target step> into the set of steps and does not care that there is no step to
+replace with that.

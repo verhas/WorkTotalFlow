@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="Com.Verhas.Workflow">
+    <version position="left" />
+	<bannerLeft>
+		<name>Com.Verhas.Workflow</name>
+		<src>
+			http://www.verhas.com/WEB/download/attachments/1802277/color_logo_42px.jpg
+		</src>
+		<href>http://www.verhas.com/</href>
+	</bannerLeft>
+	<bannerRight>
+		<src></src>
+	</bannerRight>
+	<body>
+		<links>
+			<item name="Apache" href="http://www.apache.org/" />
+			<item name="Maven 2" href="http://maven.apache.org/" />
+		</links>
+
+		<menu name="Verhas &amp; Verhas Software Craftsmen">
+			<item name="Company Home page" href="http://www.verhas.com" />
+		</menu>
+
+		<menu name="Simple Workflow documentation">
+			<item name="Home Page" href="index.html" />
+			<item name="FAQ" href="faq.html"/>
+			<item name="Api Reference" href="apidocs/index.html" />
+		</menu>
+		<menu name="Download">
+			<item name="source" href="../workflow-1.0.0-src.zip" />
+			<item name="documentation" href="../workflow-1.0.0-doc.zip" />
+			<item name="binaries" href="../workflow-1.0.0-bin.zip" />
+		</menu>
+		<menu ref="reports" />
+
+	</body>
+</project>
+
