@@ -4,7 +4,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public interface Functions {
-    interface PostFunction<K, V, R, T> {
+    interface Post<K, V, R, T> {
 
         /**
          * Execute the post function.
@@ -34,7 +34,7 @@ public interface Functions {
      * servlet container session and if the environment is clustered the object
      * may not travel from one node to the other.
      */
-    interface PreFunction<K, V, R, T> extends Function<Action<K, V, R, T>, T> {
+    interface Pre<K, V, R, T> extends Function<Action<K, V, R, T>, T> {
 
     }
 
@@ -59,7 +59,7 @@ public interface Functions {
          * @param userInput       the user input provided by the user
          * @return true if the user input is acceptable and false if it is erroneous
          */
-        public boolean test(Action<K, V, R, T> action, T transientObject,
+        boolean test(Action<K, V, R, T> action, T transientObject,
                             Parameters<K, V> userInput);
     }
 

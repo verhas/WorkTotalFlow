@@ -175,8 +175,8 @@ thus we do not have any user input.
  This method calls the validator if it was configured. If the validator fails
 then the method throws <<<ValidatorFailedException>>>. Otherwise if no
 validator is configured or the validator returned <<<true>>> then the
-configured <<<PostFunction>>>'s method <<<postFunction>>> is called. After the
-<<<postFunction>>> returned some <<<Result>>> the workflow is transitioned to
+configured <<<PostFunction>>>'s method <<<post>>> is called. After the
+<<<post>>> returned some <<<Result>>> the workflow is transitioned to
 the new states as configured in the workflow definition. For more
 information on how this transition is performed read {{more_than_one_step.html}}.
 

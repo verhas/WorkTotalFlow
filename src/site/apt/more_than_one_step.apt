@@ -123,7 +123,7 @@ new set of steps is calculated as the following:
 
  * The action <<<a>>> to be performed belongs to <<<s_k>>>.
 
- * The action performs and the postFunction returns the result <<<r>>>.
+ * The action performs and the post returns the result <<<r>>>.
 
  * The result <<<r>>> after executing action <<<a>>> from the step <<<s_k>>>
 targets the step set <<<T = ( t_1, t_2, ... , t_m)>>>. This is configured in the

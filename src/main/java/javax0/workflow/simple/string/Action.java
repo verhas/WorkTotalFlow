@@ -10,11 +10,11 @@ import javax0.workflow.Step;
 public class Action<T> extends javax0.workflow.simple.Action<String,String,String,T> {
     public Action(Step<String,String,String,T> step,
                   Parameters parameters,
-                  Functions.PreFunction pre,
+                  Functions.Pre pre,
                   Functions.Condition condition,
-                  Functions.PreFunction preFunction,
+                  Functions.Pre preFunction,
                   Functions.Validator validator,
-                  Functions.PostFunction postFunction) {
-        super(step, parameters, pre, condition, preFunction, validator, postFunction);
+                  Functions.Post post) {
+        super(step, parameters, pre, condition, preFunction, validator, post);
     }
 }

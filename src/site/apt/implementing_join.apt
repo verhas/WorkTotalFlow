@@ -117,14 +117,14 @@ your job when you have only the names of the steps at hand.
 package com.verhas.workflow;
 import java.util.Map;
 public interface PostFunction extends Function {
-    public Result postFunction(
+    public Result post(
             Action action,
             Object transientObject,
             Map<String, String> userInput);
 }
 --------------------------------------------------------------------------------
 
- defines the method <<<postFunction>>> that gets the <<<action>>> as an
+ defines the method <<<post>>> that gets the <<<action>>> as an
 argument and therefore can call any version of the method <<<join()>>>.
 
 --------------------------------------------------------------------------------

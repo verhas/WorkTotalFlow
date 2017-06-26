@@ -13,7 +13,7 @@ public interface Step<K, V, R, T> {
      *
      * @return the workflow
      */
-    public Workflow<K, V, R, T> getWorkflow();
+    Workflow<K, V, R, T> getWorkflow();
 
     /**
      * Get the actions that can be performed from this step. The returned collection
@@ -23,6 +23,6 @@ public interface Step<K, V, R, T> {
      *
      * @return the collection of executable actions
      */
-    public Collection<Action<K, V, R, T>> getActions();
+    Collection<Action<K, V, R, T>> getActions();
 
 }

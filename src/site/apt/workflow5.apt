@@ -76,7 +76,7 @@ flow will be in.
 WorkflowDefinition
 
  Now that we know that 'actions' are not atomic but are rather composed by
-condition, prefunction, validator and postFunction we should see a sample
+condition, prefunction, validator and post we should see a sample
 workflow definition.
 
  <<<WorkflowDefinition>>> is a structure in the memory of the JVM and WTF
@@ -101,7 +101,7 @@ applications will use this builder anyway.
             condition="SampleCondition"
             preFunction="SamplePreFunction"
             validator="SampleValidator"
-            postFunction="SamplePostFunction">
+            post="SamplePostFunction">
               <parameter name="genericActionParameterName"
               value="genericActionParameterValue"/>
     </action>
@@ -166,7 +166,7 @@ actions and the steps is named, and their order in the XML file is not
 important.
 
  An action may have a <<<condition>>>, a <<<preFunction>>>, a <<<validator>>>
-and a <<<postFunction>>>. Together we call them action functions. 
+and a <<<post>>>. Together we call them action functions.
 In the XML definition these are defined as tag
 attributes and should name the class that implements the code of each. None of
 the listed elements are mandatory. If there is no <<<condition>>> defined then

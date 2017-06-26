@@ -19,8 +19,8 @@ public class Workflow<K, V, R, T> implements javax0.workflow.Workflow<K, V, R, T
     }
 
     @Override
-    public Supplier<javax0.workflow.Result<K, V, R, T>> result(Action<K, V, R, T> action, R key) {
-        return null;
+    public Supplier<javax0.workflow.Result<K, V, R, T>> result(javax0.workflow.Action<K, V, R, T> action, R key) {
+        return resultFactory.apply(action,key);
     }
 
     public Collection<javax0.workflow.Step<K, V, R, T>> getSteps() {

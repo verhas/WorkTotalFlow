@@ -4,7 +4,7 @@
             condition="javax0.workflow.SampleCondition"
             preFunction="javax0.workflow.SamplePreFunction"
             validator="javax0.workflow.SampleValidator"
-            postFunction="javax0.workflow.SamplePostFunction">
+            post="javax0.workflow.SamplePostFunction">
               <parameter name="genericActionParameterName"
               value="genericActionParameterValue"/>
     </action>

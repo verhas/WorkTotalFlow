@@ -3,10 +3,7 @@ package javax0.workflow.simple;
 import javax0.workflow.*;
 import javax0.workflow.exceptions.ValidatorFailed;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Peter Verhas
@@ -16,23 +13,23 @@ public class Action<K,V,R,T> implements javax0.workflow.Action<K,V,R,T> {
     private final javax0.workflow.Step<K, V, R, T> step;
     private final Parameters parameters;
     private final Functions.Condition<K,V,R,T> condition;
-    private final Functions.PreFunction<K,V,R,T> preFunction;
+    private final Functions.Pre<K,V,R,T> pre;
     private final Functions.Validator<K,V,R,T> validator;
-    private final Functions.PostFunction<K,V,R,T> postFunction;
+    private final Functions.Post<K,V,R,T> post;
 
     public Action(javax0.workflow.Step<K,V,R,T> step,
                   Parameters parameters,
-                  Functions.PreFunction pre,
+                  Functions.Pre pre,
                   Functions.Condition condition,
-                  Functions.PreFunction preFunction,
+                  Functions.Pre preFunction,
                   Functions.Validator validator,
-                  Functions.PostFunction postFunction) {
+                  Functions.Post post) {
         this.step = step;
         this.parameters = parameters;
         this.condition = condition;
-        this.preFunction = preFunction;
+        this.pre = preFunction;
         this.validator = validator;
-        this.postFunction = postFunction;
+        this.post = post;
     }
 
     @Override
@@ -60,8 +57,8 @@ public class Action<K,V,R,T> implements javax0.workflow.Action<K,V,R,T> {
 
     @Override
     public T performPre() {
-        if (preFunction != null) {
-            return preFunction.apply(this);
+        if (pre != null) {
+            return pre.apply(this);
         } else {
             return null;
         }
@@ -88,10 +85,10 @@ public class Action<K,V,R,T> implements javax0.workflow.Action<K,V,R,T> {
         }
 
         final javax0.workflow.Result result;
-        if (postFunction != null) {
-            result = postFunction.apply(this, transientObject, userInput);
+        if (post != null) {
+            result = post.apply(this, transientObject, userInput);
         } else {
-            result = () -> Arrays.asList(getStep());
+            result = () -> Collections.singletonList(getStep());
         }
         Collection<javax0.workflow.Step<K, V, R, T>> steps = result.getSteps();
         mergeSteps(steps);
