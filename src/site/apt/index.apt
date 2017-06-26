@@ -4,16 +4,16 @@
 
 Introduction
 
- Com.Verhas.Workflow (CVW) is a workflow implementation to be used as a library
-in Java programs. CVW aims to implement the features and functions that are the
+ WTF is a workflow implementation to be used as a library
+in Java programs. WTF aims to implement the features and functions that are the
 very basic features of a workflow.
 
- CVW is most suited to applications that need workflow with user
+ WTF is most suited to applications that need workflow with user
 interaction. A workflow runs through screens where the user gives input, selects
 what to do and the workflow runs transferring the state of the application from
 one state to another.
 
- What CVW defines are:
+ What WTF defines are:
 
  * api to define a workflow (<<<WorkflowDefinition>>>)
 
@@ -31,11 +31,11 @@ post functions in workflow
 []
 
  Along with the definition of this structure you can also get a simple
-implementation of the CVW interface that delivers out of the box workflow
+implementation of the WTF interface that delivers out of the box workflow
 functionality for you including and XML based worfklow definition parser.
 
  * {{{workflow.html}Workflow in one minute}} basic elements of a workflow in
-CVW
+WTF
 
  * {{{workflow5.html}Workflow in 5 minutes}} a bit more detailed
 
@@ -54,4 +54,4 @@ goes from parallel execution to single thread gain (as opposed to forking).
 
  * {{{threading.html}Handling multi thread environment}}
 
- * {{{transaction.html}Transactions in CVW}}
+ * {{{transaction.html}Transactions in WTF}}

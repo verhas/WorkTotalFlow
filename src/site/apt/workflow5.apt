@@ -8,7 +8,7 @@ have read {{{workflow.html}workflow in one minute}}.
 
 Workflow and definitions
 
- The workflow interface contains Java interfaces for <<<Workflow>>>,
+ The workflow API contains Java interfaces for <<<Workflow>>>,
 <<<Step>>>, <<<Action>>> and <<<Result>> and their defining counterparts
 <<<WorkflowDefinition>>>,<<<StepDefinition>>>, <<<ActionDefinition>>> and
 <<<ResultDefinition>>. The definitions define the structure of the workflow and
@@ -79,7 +79,7 @@ WorkflowDefinition
 condition, prefunction, validator and postFunction we should see a sample
 workflow definition.
 
- <<<WorkflowDefinition>>> is a structure in the memory of the JVM and CVW
+ <<<WorkflowDefinition>>> is a structure in the memory of the JVM and WTF
 only assumes that there is some class that implements the interface
 <<<WorkflowBuilder>>> and somehow creates the <<<WorkflowDefinition>>>.
 Even though
@@ -98,17 +98,17 @@ applications will use this builder anyway.
 <workflow start="initialStep">
   <actions>
     <action name="start"
-            condition="com.verhas.workflow.SampleCondition"
-            preFunction="com.verhas.workflow.SamplePreFunction"
-            validator="com.verhas.workflow.SampleValidator"
-            postFunction="com.verhas.workflow.SamplePostFunction">
+            condition="SampleCondition"
+            preFunction="SamplePreFunction"
+            validator="SampleValidator"
+            postFunction="SamplePostFunction">
               <parameter name="genericActionParameterName"
               value="genericActionParameterValue"/>
     </action>
     <action name="cutOff"
-            condition="com.verhas.workflow.SampleCondition"/>
+            condition="SampleCondition"/>
     <action name="finish"
-            condition="com.verhas.workflow.SampleCondition"/>
+            condition="SampleCondition"/>
   </actions>
 
   <steps>
@@ -146,7 +146,7 @@ applications will use this builder anyway.
 --------------------------------------------------------------------------------
 
  This is a very simple workflow not much of use. It was originally crafted to test
-a bit the simple implementation of CVW. There is one benefit compared to a real
+a bit the simple implementation of WTF. There is one benefit compared to a real
 workflow: it is short. To have a better overwiev of it here is the graphical
 representation of the same workflow definition:
 

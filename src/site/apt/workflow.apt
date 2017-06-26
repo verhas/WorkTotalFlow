@@ -3,7 +3,7 @@
       ---
 Workflow in one minute
 
- This page describes shortly what a workflow is in CVW.
+ This page describes shortly what a workflow is in WTF.
 
  To ease the understanding here is a sketch that plots the elements of a
 workflow and their relations: (explanation follows)
@@ -17,7 +17,7 @@ be in more than one step at a time, but for now we neglect this complexity.
 
  When a workflow is in a <Step> there can be several actions to be executed
 to transport the workflow from the step to another. The available actions
-are defined in the workflow definition. The application using the CVW library
+are defined in the workflow definition. The application using the WTF library
 may decide which action to perform. The usual implementation displays the
 available actions to the user and the user can select what to do next.
 
@@ -25,17 +25,17 @@ available actions to the user and the user can select what to do next.
 executed and produces a <Result>. Based on the <Result> the workflow will
 transfer from the original step to a new one.
 
- CVW does not execute workflow. No threads are started, no states are stored. It
+ WTF does not execute workflow. No threads are started, no states are stored. It
 is up to the embedding application to call methods from the API to build up
 workflow definition (there is some default implementation that reads
 XML and returns <<<WorkflowDefinition>>>), instantiate workflow, advance
 the workflow from step to step.
 
- In one minute this is a workflow in CVW. There are some more details, like
+ In one minute this is a workflow in WTF. There are some more details, like
 conditions, validators, pre and post functions in actions, definitions of steps,
 results, actions and workflow but those do not fit into the one minute version
 of workflow page. For these details go on reading
 {{{workflow5.html}workflow in 5 minutes}}.
 
- To see some sample code to use CVW see {{sample.java.html}}. But before that
+ To see some sample code to use WTF see {{sample.java.html}}. But before that
 you better read the five minutes intro.

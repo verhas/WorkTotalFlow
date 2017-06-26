@@ -1,17 +1,17 @@
 <workflow start="initialStep">
   <actions>
     <action name="start"
-            condition="com.verhas.workflow.SampleCondition"
-            preFunction="com.verhas.workflow.SamplePreFunction"
-            validator="com.verhas.workflow.SampleValidator"
-            postFunction="com.verhas.workflow.SamplePostFunction">
+            condition="javax0.workflow.SampleCondition"
+            preFunction="javax0.workflow.SamplePreFunction"
+            validator="javax0.workflow.SampleValidator"
+            postFunction="javax0.workflow.SamplePostFunction">
               <parameter name="genericActionParameterName"
               value="genericActionParameterValue"/>
     </action>
     <action name="cutOff"
-            condition="com.verhas.workflow.SampleCondition"/>
+            condition="javax0.workflow.SampleCondition"/>
     <action name="finish"
-            condition="com.verhas.workflow.SampleCondition"/>
+            condition="javax0.workflow.SampleCondition"/>
   </actions>
 
   <steps>

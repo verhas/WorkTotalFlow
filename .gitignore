@@ -8,3 +8,6 @@
 .project
 .settings/*
 target/*
+/.idea/
+.idea/
+/wtf.iml
