@@ -17,7 +17,7 @@ public interface Action<K, V, R, T> {
      *
      * @return the step this action can be executed from
      */
-    Step getStep();
+    Step<K, V, R, T> getStep();
 
     /**
      * @return true if the action can be processed. This usually true when the condition
@@ -26,7 +26,7 @@ public interface Action<K, V, R, T> {
     boolean available();
 
 
-    default Supplier<Result<K, V, R, T>> result(R key) {
+    default Supplier<? extends Result<K, V, R, T>> result(R key) {
         return getStep().getWorkflow().result(this, key);
     }
 
@@ -47,7 +47,7 @@ public interface Action<K, V, R, T> {
      * action.
      * @throws ValidatorFailed
      */
-    default Collection<Step<K, V, R, T>> perform() throws ValidatorFailed {
+    default Collection<? extends Step<K, V, R, T>> perform() throws ValidatorFailed {
         T transientObject = performPre();
         return performPost(transientObject, null);
     }
@@ -86,7 +86,7 @@ public interface Action<K, V, R, T> {
      * the work flow is in remain the same.
      * @throws ValidatorFailed
      */
-    Collection<Step<K, V, R, T>> performPost(T transientObject, Parameters userInput)
+    Collection<? extends Step<K, V, R, T>> performPost(T transientObject, Parameters userInput)
             throws ValidatorFailed;
 
     /**
@@ -98,7 +98,7 @@ public interface Action<K, V, R, T> {
      * the steps listed in the argument any more, but only in the steps in which the
      * actual action performing leads to.
      * <p>
-     * More precisely the the method {@code join(Collection<Step> steps)} will remove the
+     * More precisely the the method {@code join(Collection<StepImpl> steps)} will remove the
      * listed steps from the set of steps that the workflow is in currently.
      * Other steps that are not removed will still belong to the set. The new
      * set of steps will be the ones that the currently executing action leads
@@ -114,7 +114,7 @@ public interface Action<K, V, R, T> {
      *
      * @param steps the steps to join.
      */
-    void join(Collection<Step> steps);
+    void join(Collection<? extends Step<K, V, R, T>> steps);
 
     Parameters<K, V> getParameters();
 }

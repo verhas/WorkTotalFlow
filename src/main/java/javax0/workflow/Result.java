@@ -13,5 +13,5 @@ public interface Result<K, V, R, T> {
      *
      * @return the collections of the steps
      */
-    Collection<Step<K, V, R, T>> getSteps();
+    Collection<? extends Step<K, V, R, T>> getSteps();
 }

@@ -15,11 +15,11 @@ public interface Workflow<K, V, R, T> {
     /**
      * Get the steps that the work flow is currently in.
      */
-    Collection<Step<K, V, R, T>> getSteps();
+    Collection<? extends Step<K, V, R, T>> getSteps();
 
     /**
      * Set the steps that the work flow is currently in.
      */
-    void setSteps(Collection<Step<K, V, R, T>> steps);
+    void setSteps(Collection<? extends Step<K, V, R, T>> steps);
 
 }

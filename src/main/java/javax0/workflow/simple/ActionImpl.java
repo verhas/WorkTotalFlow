@@ -3,37 +3,39 @@ package javax0.workflow.simple;
 import javax0.workflow.*;
 import javax0.workflow.exceptions.ValidatorFailed;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Peter Verhas
  */
-public class Action<K,V,R,T> implements javax0.workflow.Action<K,V,R,T> {
+public class ActionImpl<K, V, R, T> implements Action<K, V, R, T> {
 
-    private final javax0.workflow.Step<K, V, R, T> step;
+    private final Step<K, V, R, T> step;
     private final Parameters parameters;
-    private final Functions.Condition<K,V,R,T> condition;
-    private final Functions.Pre<K,V,R,T> pre;
-    private final Functions.Validator<K,V,R,T> validator;
-    private final Functions.Post<K,V,R,T> post;
+    private final Functions.Condition<K, V, R, T> condition;
+    private final Functions.Pre<K, V, R, T> pre;
+    private final Functions.Validator<K, V, R, T> validator;
+    private final Functions.Post<K, V, R, T> post;
 
-    public Action(javax0.workflow.Step<K,V,R,T> step,
-                  Parameters parameters,
-                  Functions.Pre pre,
-                  Functions.Condition condition,
-                  Functions.Pre preFunction,
-                  Functions.Validator validator,
-                  Functions.Post post) {
+    public ActionImpl(Step<K, V, R, T> step,
+                      Parameters parameters,
+                      Functions.Pre pre,
+                      Functions.Condition condition,
+                      Functions.Validator validator,
+                      Functions.Post post) {
         this.step = step;
         this.parameters = parameters;
         this.condition = condition;
-        this.pre = preFunction;
+        this.pre = pre;
         this.validator = validator;
         this.post = post;
     }
 
     @Override
-    public javax0.workflow.Step<K, V, R, T> getStep() {
+    public Step<K, V, R, T> getStep() {
         return step;
     }
 
@@ -76,7 +78,7 @@ public class Action<K,V,R,T> implements javax0.workflow.Action<K,V,R,T> {
      * @throws ValidatorFailed
      */
     @Override
-    public Collection<javax0.workflow.Step<K, V, R, T>> performPost(T transientObject,
+    public Collection<? extends Step<K, V, R, T>> performPost(T transientObject,
                                                                     Parameters userInput) throws ValidatorFailed {
 
         if (validator != null
@@ -84,13 +86,13 @@ public class Action<K,V,R,T> implements javax0.workflow.Action<K,V,R,T> {
             throw new ValidatorFailed();
         }
 
-        final javax0.workflow.Result result;
+        final Result result;
         if (post != null) {
             result = post.apply(this, transientObject, userInput);
         } else {
             result = () -> Collections.singletonList(getStep());
         }
-        Collection<javax0.workflow.Step<K, V, R, T>> steps = result.getSteps();
+        Collection<Step<K, V, R, T>> steps = result.getSteps();
         mergeSteps(steps);
         return steps;
     }
@@ -103,9 +105,9 @@ public class Action<K,V,R,T> implements javax0.workflow.Action<K,V,R,T> {
      *
      * @param steps that replace the current steps the workflow is in
      */
-    private void mergeSteps(Collection<javax0.workflow.Step<K, V, R, T>> steps) {
-        Set<javax0.workflow.Step<K, V, R, T>> stepSet = new HashSet<>();
-        Collection<javax0.workflow.Step<K, V, R, T>> sourceSteps = getStep().getWorkflow().getSteps();
+    private void mergeSteps(Collection<? extends Step<K, V, R, T>> steps) {
+        Set<Step<K, V, R, T>> stepSet = new HashSet<>();
+        Collection<? extends Step<K, V, R, T>> sourceSteps = getStep().getWorkflow().getSteps();
         if (sourceSteps != null) {
             stepSet.addAll(sourceSteps);
             stepSet.remove(step);
@@ -120,9 +122,9 @@ public class Action<K,V,R,T> implements javax0.workflow.Action<K,V,R,T> {
      * @param steps
      */
     @Override
-    public void join(Collection<javax0.workflow.Step> steps) {
-        final Collection<javax0.workflow.Step> stepSet = new HashSet<>();
-        final javax0.workflow.Workflow workflow = getStep().getWorkflow();
+    public void join(Collection<? extends Step<K,V,R,T>> steps) {
+        final Collection<StepImpl> stepSet = new HashSet<>();
+        final Workflow workflow = getStep().getWorkflow();
         stepSet.addAll(workflow.getSteps());
         stepSet.removeAll(steps);
         workflow.setSteps(stepSet);
