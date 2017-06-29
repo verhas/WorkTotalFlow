@@ -13,13 +13,13 @@ public interface Workflow<K, V, R, T> {
 
     Supplier<Result<K, V, R, T>> result(Action<K, V, R, T> action, R key);
     /**
-     * Get the steps that the work flow is currently in.
+     * Get the workflow that the work flow is currently in.
      */
-    Collection<? extends Step<K, V, R, T>> getSteps();
+    Collection<Step<K, V, R, T>> getSteps();
 
     /**
-     * Set the steps that the work flow is currently in.
+     * Set the workflow that the work flow is currently in.
      */
-    void setSteps(Collection<? extends Step<K, V, R, T>> steps);
+    void setSteps(Collection<Step<K, V, R, T>> steps);
 
 }

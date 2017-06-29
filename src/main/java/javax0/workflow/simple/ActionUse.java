@@ -8,30 +8,13 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * @author Peter Verhas
- */
-public class ActionImpl<K, V, R, T> implements Action<K, V, R, T> {
-
+public class ActionUse<K, V, R, T> implements Action<K, V, R, T> {
+    final ActionDef<K, V, R, T> actionDef;
     private final Step<K, V, R, T> step;
-    private final Parameters parameters;
-    private final Functions.Condition<K, V, R, T> condition;
-    private final Functions.Pre<K, V, R, T> pre;
-    private final Functions.Validator<K, V, R, T> validator;
-    private final Functions.Post<K, V, R, T> post;
 
-    public ActionImpl(Step<K, V, R, T> step,
-                      Parameters parameters,
-                      Functions.Pre pre,
-                      Functions.Condition condition,
-                      Functions.Validator validator,
-                      Functions.Post post) {
+    public ActionUse(Step<K, V, R, T> step, ActionDef<K, V, R, T> actionDef) {
         this.step = step;
-        this.parameters = parameters;
-        this.condition = condition;
-        this.pre = pre;
-        this.validator = validator;
-        this.post = post;
+        this.actionDef = actionDef;
     }
 
     @Override
@@ -41,7 +24,7 @@ public class ActionImpl<K, V, R, T> implements Action<K, V, R, T> {
 
     @Override
     public boolean available() {
-        return condition == null || condition.test(this);
+        return actionDef.condition == null || actionDef.condition.test(this);
     }
 
     /**
@@ -53,14 +36,14 @@ public class ActionImpl<K, V, R, T> implements Action<K, V, R, T> {
      * @return the merged parameters
      */
     @Override
-    public Parameters getParameters() {
-        return parameters;
+    public Parameters<K,V> getParameters() {
+        return actionDef.parameters;
     }
 
     @Override
     public T performPre() {
-        if (pre != null) {
-            return pre.apply(this);
+        if (actionDef.pre != null) {
+            return actionDef.pre.apply(this);
         } else {
             return null;
         }
@@ -78,17 +61,17 @@ public class ActionImpl<K, V, R, T> implements Action<K, V, R, T> {
      * @throws ValidatorFailed
      */
     @Override
-    public Collection<? extends Step<K, V, R, T>> performPost(T transientObject,
-                                                                    Parameters userInput) throws ValidatorFailed {
+    public Collection<Step<K, V, R, T>> performPost(T transientObject,
+                                                    Parameters<K,V> userInput) throws ValidatorFailed {
 
-        if (validator != null
-                && !validator.test(this, transientObject, userInput)) {
+        if (actionDef.validator != null
+                && !actionDef.validator.test(this, transientObject, userInput)) {
             throw new ValidatorFailed();
         }
 
-        final Result result;
-        if (post != null) {
-            result = post.apply(this, transientObject, userInput);
+        final Result<K, V, R, T> result;
+        if (actionDef.post != null) {
+            result = actionDef.post.apply(this, transientObject, userInput);
         } else {
             result = () -> Collections.singletonList(getStep());
         }
@@ -98,12 +81,12 @@ public class ActionImpl<K, V, R, T> implements Action<K, V, R, T> {
     }
 
     /**
-     * Merge the steps into the existing array of steps that the
+     * Merge the workflow into the existing array of workflow that the
      * work flow is in currently.
      * <p>
      * This method is called after a post function is executed.
      *
-     * @param steps that replace the current steps the workflow is in
+     * @param steps that replace the current workflow the workflow is in
      */
     private void mergeSteps(Collection<? extends Step<K, V, R, T>> steps) {
         Set<Step<K, V, R, T>> stepSet = new HashSet<>();
@@ -117,16 +100,26 @@ public class ActionImpl<K, V, R, T> implements Action<K, V, R, T> {
     }
 
     /**
-     * Joins the steps passed as argument.
+     * Joins the workflow passed as argument.
      *
      * @param steps
      */
     @Override
-    public void join(Collection<? extends Step<K,V,R,T>> steps) {
-        final Collection<StepImpl> stepSet = new HashSet<>();
-        final Workflow workflow = getStep().getWorkflow();
+    public void join(Collection<Step<K, V, R, T>> steps) {
+        final Collection<Step<K, V, R, T>> stepSet = new HashSet<>();
+        final Workflow<K, V, R, T> workflow = getStep().getWorkflow();
         stepSet.addAll(workflow.getSteps());
         stepSet.removeAll(steps);
         workflow.setSteps(stepSet);
+    }
+
+    @Override
+    public String toString() {
+        return "Action[" + getName() + "]";
+    }
+
+    @Override
+    public R getName() {
+        return actionDef.getName();
     }
 }

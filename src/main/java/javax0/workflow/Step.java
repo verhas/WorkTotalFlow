@@ -3,10 +3,9 @@ package javax0.workflow;
 import java.util.Collection;
 
 /**
- *
  * @author Peter Verhas
  */
-public interface Step<K, V, R, T> {
+public interface Step<K, V, R, T> extends Named<R> {
 
     /**
      * Get the workflow instance that this step belongs to.
@@ -18,7 +17,7 @@ public interface Step<K, V, R, T> {
     /**
      * Get the actions that can be performed from this step. The returned collection
      * contains only the actions for which the condition method.
-     *
+     * <p>
      * {@code canBePerformed} returns true.
      *
      * @return the collection of executable actions

@@ -7,6 +7,7 @@ import javax0.workflow.Step;
 import javax0.workflow.Workflow;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -15,7 +16,7 @@ import java.util.function.Supplier;
  */
 public class WorkflowImpl<K, V, R, T> implements Workflow<K, V, R, T> {
     private final BiFunction<Action<K, V, R, T>, R, Supplier<Result<K, V, R, T>>> resultFactory;
-    private Collection<? extends Step<K, V, R, T>> steps = null;
+    private Collection<Step<K, V, R, T>> steps = Collections.emptySet();
 
     public WorkflowImpl(BiFunction<Action<K, V, R, T>, R, Supplier<Result<K, V, R, T>>> resultFactory) {
         this.resultFactory = resultFactory;
@@ -27,12 +28,12 @@ public class WorkflowImpl<K, V, R, T> implements Workflow<K, V, R, T> {
     }
 
     @Override
-    public Collection<? extends Step<K, V, R, T>> getSteps() {
+    public Collection<Step<K, V, R, T>> getSteps() {
         return steps;
     }
 
     @Override
-    public void setSteps(Collection<? extends Step<K, V, R, T>> steps) {
+    public void setSteps(Collection<Step<K, V, R, T>> steps) {
         this.steps = steps;
     }
 

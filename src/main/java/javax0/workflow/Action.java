@@ -8,11 +8,11 @@ import java.util.function.Supplier;
 /**
  * @author verhas
  */
-public interface Action<K, V, R, T> {
+public interface Action<K, V, R, T> extends Named<R> {
 
     /**
      * Get the step that this action is executed from. Every action starts from
-     * a step in the workflow and moves the workflow into one step or into multiple steps.
+     * a step in the workflow and moves the workflow into one step or into multiple workflow.
      * This method returns the step from which the action can be executed from.
      *
      * @return the step this action can be executed from
@@ -32,22 +32,22 @@ public interface Action<K, V, R, T> {
 
     /**
      * Execute the pre-function, validator and post-function for the specific
-     * action and moves the workflow to the target step or target steps
-     * It is multipled steps in case
+     * action and moves the workflow to the target step or target workflow
+     * It is multipled workflow in case
      * the action with the result returned by the post function is a split
      * action.
      * <p>
      * This method is called when an action can be performed automatically
      * without intermediate user input.
      * <p>
-     * The method also alters the steps of the work flow object, so the
-     * next call to {@code getSteps()} should return the new steps.
+     * The method also alters the workflow of the work flow object, so the
+     * next call to {@code getSteps()} should return the new workflow.
      *
-     * @return the step or steps that the workflow is after performing the
+     * @return the step or workflow that the workflow is after performing the
      * action.
      * @throws ValidatorFailed
      */
-    default Collection<? extends Step<K, V, R, T>> perform() throws ValidatorFailed {
+    default Collection<Step<K, V, R, T>> perform() throws ValidatorFailed {
         T transientObject = performPre();
         return performPost(transientObject, null);
     }
@@ -73,48 +73,48 @@ public interface Action<K, V, R, T> {
      * This method is called when the action should be performed in two phases
      * as described in the documentation of the method {@link #performPre()}
      * <p>
-     * The method should also alter the steps of the work flow object, so the
-     * next call to {@code getSteps()} should return the steps that the work
+     * The method should also alter the workflow of the work flow object, so the
+     * next call to {@code getSteps()} should return the workflow that the work
      * flow is after the execution of the action.
      *
      * @param transientObject the transient state object returned by the pre-function
      * @param userInput       the user-input that was gathered after calling pre-function
-     * @return the steps to which the action transfers from the old step. (Not
-     * all the steps the workflow is in after the action, only the ones
+     * @return the workflow to which the action transfers from the old step. (Not
+     * all the workflow the workflow is in after the action, only the ones
      * that replace the step we transit from.) It returns {@code null}
-     * if the action postFunction returned null. In that case the steps
+     * if the action postFunction returned null. In that case the workflow
      * the work flow is in remain the same.
      * @throws ValidatorFailed
      */
-    Collection<? extends Step<K, V, R, T>> performPost(T transientObject, Parameters userInput)
+    Collection<Step<K, V, R, T>> performPost(T transientObject, Parameters<K,V> userInput)
             throws ValidatorFailed;
 
     /**
-     * Join the steps listed in the argument list into this action.
+     * Join the workflow listed in the argument list into this action.
      * <p>
      * This method can be used to implement a join programmatically. The post
-     * function may call this method to list all the steps that have to be
+     * function may call this method to list all the workflow that have to be
      * joined to the actual flow. Joining means that the workflow will not be in
-     * the steps listed in the argument any more, but only in the steps in which the
+     * the workflow listed in the argument any more, but only in the workflow in which the
      * actual action performing leads to.
      * <p>
-     * More precisely the the method {@code join(Collection<StepImpl> steps)} will remove the
-     * listed steps from the set of steps that the workflow is in currently.
-     * Other steps that are not removed will still belong to the set. The new
-     * set of steps will be the ones that the currently executing action leads
-     * to and the steps that were not joined.
+     * More precisely the the method {@code join(Collection<StepImpl> workflow)} will remove the
+     * listed workflow from the set of workflow that the workflow is in currently.
+     * Other workflow that are not removed will still belong to the set. The new
+     * set of workflow will be the ones that the currently executing action leads
+     * to and the workflow that were not joined.
      * <p>
      * The actual implementation should be sloppy in the sense that the caller
-     * may specify steps that the workflow is not currently in.
+     * may specify workflow that the workflow is not currently in.
      * <p>
      * This is a complimentary method that can be implemented using only the
      * interface methods, and the implementation in the package
      * {@code com.verhas.workflow.simple} is one that does not depend on the
      * actual implementation details.
      *
-     * @param steps the steps to join.
+     * @param steps the workflow to join.
      */
-    void join(Collection<? extends Step<K, V, R, T>> steps);
+    void join(Collection<Step<K, V, R, T>> steps);
 
     Parameters<K, V> getParameters();
 }

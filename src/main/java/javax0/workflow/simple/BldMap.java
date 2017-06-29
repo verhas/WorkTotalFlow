@@ -1,30 +1,30 @@
-package javax0.workflow.simple.builder;
+package javax0.workflow.simple;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-abstract class BldMap<R,B extends Named<R>> {
+abstract class BldMap<R, B extends Named<R>> {
 
-    private Map<R,B> map = new HashMap<>();
+    private final Map<R, B> map = new HashMap<>();
 
     abstract B factory();
 
-    Set<R> keySet(){
+    Set<R> keySet() {
         return map.keySet();
     }
 
-    boolean containsKey(R name){
+    boolean containsKey(R name) {
         return map.containsKey(name);
     }
 
-    B get(R name){
-        if( map.containsKey(name)){
+    B get(R name) {
+        if (map.containsKey(name)) {
             return map.get(name);
-        }else{
+        } else {
             B b = factory();
             b.name = name;
-            map.put(name,b);
+            map.put(name, b);
             return b;
         }
     }
