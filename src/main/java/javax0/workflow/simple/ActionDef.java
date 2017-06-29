@@ -16,6 +16,6 @@ class ActionDef<K, V, R, T> extends Named<R> {
 
     @Override
     public String toString() {
-        return "ActionDef[" + getName() + "']";
+        return "ActionDef[" + getName() + "]";
     }
 }

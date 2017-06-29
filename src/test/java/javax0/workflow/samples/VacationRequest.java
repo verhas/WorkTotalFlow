@@ -5,25 +5,35 @@ import javax0.workflow.Step;
 import javax0.workflow.Workflow;
 import javax0.workflow.exceptions.ValidatorFailed;
 import javax0.workflow.simple.WorkflowBuilder;
-import javax0.workflow.utils.Util;
+import javax0.workflow.utils.WorkflowWrapper;
 import org.junit.Test;
 
 import java.util.function.Supplier;
 
-import static javax0.workflow.utils.Util.*;
+import static javax0.workflow.utils.WorkflowWrapper.actionsOf;
 
 public class VacationRequest {
 
     @Test
     public void sampleVacationRequestWorkflow() throws ValidatorFailed {
         WorkflowBuilder<String, String, String, Object> wb = new WorkflowBuilder<>("OK");
+        /* TODO create a builder that converts a string of the following form to builder calls
+        start -> submit -> RM approval pending, PM approval pending
+              -> withdraw -> withdrawn
+        PM approval pending -> approve ? OK -> final auto approve pending
+                                       ?  reject -> rejected
+        RM approval pending -> approve ? OK -> final auto approve pending
+                                       ?  reject -> rejected
+                            -> reconsider -> PM approval pending
+         */
         wb.from("start").action("submit").to("RM approval pending", "PM approval pending")
                 .action("withdraw").to("withdrawn");
         wb.from("PM approval pending").action("approve").when("OK").then("final auto approve pending")
                 .when("reject").then("rejected");
         wb.from("RM approval pending").action("approve").when("OK").then("final auto approve pending")
                 .when("reject").then("rejected");
-        wb.from("RM approval pending").action("reconsider").when("OK").then("PM approval pending");
+        wb.from("final auto approve pending").to("approved");
+        wb.from("RM approval pending").action("reconsider").to("PM approval pending");
         wb.action("approve");
         wb.action("reconsider");
         wb.action("withdraw");
@@ -40,15 +50,25 @@ public class VacationRequest {
                 .validator((action, t, user) -> true)
         ;
 
-        Workflow<String, String, String, Object> wf = wb.start("start");
+        Workflow<String, String, String, Object> workflow = wb.start("start");
 
-        Util.setLogger(System.out::println);
+        WorkflowWrapper wf = new WorkflowWrapper(workflow);
+        wf.setLogger(System.out::println);
 
-        while (!workflow(wf).isIn("final auto approve pending")) {
-            if (stepsOf(wf).contains("start")) {
-                Step<String, String, String, Object> step = workflow(wf).getStep("start");
-                if (actionsOf(step).contains("submit")) {// condition says it can be sbmitted
-                    from(step).execute("submit");
+        while (wf.notOnlyIn("approved")) {
+            if (wf.isIn("start")) {
+                if (wf.canExecute("submit")) {// condition says it can be submitted
+                    wf.execute();
+                }
+            }
+            if (wf.isIn("RM approval pending")) {
+                if (wf.canExecute("approve")) {// condition says it can be submitted
+                    wf.execute();
+                }
+            }
+            if (wf.isIn("PM approval pending")) {
+                if (wf.canExecute("approve")) {// condition says it can be submitted
+                    wf.execute();
                 }
             }
         }

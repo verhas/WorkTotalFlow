@@ -4,17 +4,32 @@ import javax0.workflow.*;
 import javax0.workflow.exceptions.ValidatorFailed;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 public class ActionUse<K, V, R, T> implements Action<K, V, R, T> {
     final ActionDef<K, V, R, T> actionDef;
     private final Step<K, V, R, T> step;
+    private final boolean auto;
+    private Result<K, V, R, T> autoResult;
 
     public ActionUse(Step<K, V, R, T> step, ActionDef<K, V, R, T> actionDef) {
+        this(step, actionDef, false);
+    }
+    public ActionUse(Step<K, V, R, T> step, ActionDef<K, V, R, T> actionDef,Result<K, V, R, T> autoResult) {
+        this(step, actionDef, true);
+        this.autoResult = autoResult;
+    }
+
+    private ActionUse(Step<K, V, R, T> step, ActionDef<K, V, R, T> actionDef, boolean auto) {
         this.step = step;
         this.actionDef = actionDef;
+        this.auto = auto;
+    }
+
+    @Override
+    public boolean isAuto() {
+        return auto;
     }
 
     @Override
@@ -36,7 +51,7 @@ public class ActionUse<K, V, R, T> implements Action<K, V, R, T> {
      * @return the merged parameters
      */
     @Override
-    public Parameters<K,V> getParameters() {
+    public Parameters<K, V> getParameters() {
         return actionDef.parameters;
     }
 
@@ -61,9 +76,20 @@ public class ActionUse<K, V, R, T> implements Action<K, V, R, T> {
      * @throws ValidatorFailed
      */
     @Override
-    public Collection<Step<K, V, R, T>> performPost(T transientObject,
-                                                    Parameters<K,V> userInput) throws ValidatorFailed {
+    public void performPost(T transientObject, Parameters<K, V> userInput) throws ValidatorFailed {
 
+        validatePostAndMerge(transientObject, userInput);
+        Action<K, V, R, T> autoAction;
+        Collection<Action<K, V, R, T>> actions;
+        while (getStep().getWorkflow().getSteps().size() == 1 &&
+                (actions = getStep().getWorkflow().getSteps().stream().findAny().get().getActions()).size() == 1 &&
+                (autoAction = actions.stream().findAny().get()).isAuto()) {
+            transientObject = autoAction.performPre();
+            ((ActionUse) autoAction).validatePostAndMerge(transientObject, null);
+        }
+    }
+
+    private void validatePostAndMerge(T transientObject, Parameters<K, V> userInput) throws ValidatorFailed {
         if (actionDef.validator != null
                 && !actionDef.validator.test(this, transientObject, userInput)) {
             throw new ValidatorFailed();
@@ -73,11 +99,10 @@ public class ActionUse<K, V, R, T> implements Action<K, V, R, T> {
         if (actionDef.post != null) {
             result = actionDef.post.apply(this, transientObject, userInput);
         } else {
-            result = () -> Collections.singletonList(getStep());
+            result = autoResult;
         }
         Collection<Step<K, V, R, T>> steps = result.getSteps();
         mergeSteps(steps);
-        return steps;
     }
 
     /**

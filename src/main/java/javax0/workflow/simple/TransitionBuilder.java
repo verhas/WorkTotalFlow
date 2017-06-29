@@ -1,5 +1,10 @@
 package javax0.workflow.simple;
 
+import javax0.workflow.Result;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 public class TransitionBuilder<K, V, R, T> {
     private final WorkflowBuilder<K, V, R, T> builder;
     private final R step;
@@ -9,9 +14,23 @@ public class TransitionBuilder<K, V, R, T> {
         this.step = name;
     }
 
+    @SafeVarargs
+    public final TransitionBuilder<K, V, R, T> to(R... steps) {
+        if (builder.defaultName == null) {
+            throw new IllegalArgumentException("Can not use 'to(steps)' when there is no default name");
+        }
+        ActionDef<K, V, R, T> actionDef = builder.actions.get(builder.defaultName);
+        Result<K, V, R, T> autoResult = new ResultImpl<>();
+        autoResult.getSteps().addAll(Arrays.stream(steps).map(builder.steps::get).collect(Collectors.toSet()));
+        ActionUse<K, V, R, T> actionUse = new ActionUse<>(builder.steps.get(step), actionDef, autoResult);
+        builder.steps.get(step).actions.add(actionUse);
+        builder.resultMapping.put(step, builder.defaultName, builder.defaultName, steps);
+        return TransitionBuilder.this;
+    }
+
     public FunctionBuilder action(R name) {
         ActionDef<K, V, R, T> actionDef = builder.actions.get(name);
-        ActionUse<K, V, R, T> actionUse = new ActionUse<>(builder.steps.get(step),actionDef);
+        ActionUse<K, V, R, T> actionUse = new ActionUse<>(builder.steps.get(step), actionDef);
         builder.steps.get(step).actions.add(actionUse);
         return new FunctionBuilder(name);
     }
@@ -26,10 +45,10 @@ public class TransitionBuilder<K, V, R, T> {
 
         @SafeVarargs
         public final TransitionBuilder<K, V, R, T> to(R... steps) {
-            if (builder.defaultResult == null) {
+            if (builder.defaultName == null) {
                 throw new IllegalArgumentException("Can not use 'to(workflow)' when there is no default result");
             }
-            builder.resultMapping.put(step, action, builder.defaultResult, steps);
+            builder.resultMapping.put(step, action, builder.defaultName, steps);
             return TransitionBuilder.this;
         }
 

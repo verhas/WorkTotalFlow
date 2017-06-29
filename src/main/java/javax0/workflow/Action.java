@@ -11,6 +11,13 @@ import java.util.function.Supplier;
 public interface Action<K, V, R, T> extends Named<R> {
 
     /**
+     * When an action is automatic it is executed immediately without waiting from external trigger.
+     *
+     * @return true if the action is automatic
+     */
+    boolean isAuto();
+
+    /**
      * Get the step that this action is executed from. Every action starts from
      * a step in the workflow and moves the workflow into one step or into multiple workflow.
      * This method returns the step from which the action can be executed from.
@@ -47,9 +54,9 @@ public interface Action<K, V, R, T> extends Named<R> {
      * action.
      * @throws ValidatorFailed
      */
-    default Collection<Step<K, V, R, T>> perform() throws ValidatorFailed {
+    default void perform() throws ValidatorFailed {
         T transientObject = performPre();
-        return performPost(transientObject, null);
+        performPost(transientObject, null);
     }
 
     /**
@@ -86,7 +93,7 @@ public interface Action<K, V, R, T> extends Named<R> {
      * the work flow is in remain the same.
      * @throws ValidatorFailed
      */
-    Collection<Step<K, V, R, T>> performPost(T transientObject, Parameters<K,V> userInput)
+   void performPost(T transientObject, Parameters<K,V> userInput)
             throws ValidatorFailed;
 
     /**
