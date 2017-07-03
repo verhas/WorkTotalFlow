@@ -5,7 +5,6 @@ import javax0.workflow.Step;
 import javax0.workflow.Workflow;
 import javax0.workflow.exceptions.ValidatorFailed;
 import javax0.workflow.simple.WorkflowBuilder;
-import javax0.workflow.utils.Executor;
 import javax0.workflow.utils.WorkflowWrapper;
 import org.junit.Test;
 
@@ -17,7 +16,7 @@ public class VacationRequest {
     public void sampleVacationRequestWorkflow() throws ValidatorFailed {
         Workflow<String, String, String, Object, Object> workflow = createWorkflow();
 
-        WorkflowWrapper wf = new WorkflowWrapper(workflow);
+        WorkflowWrapper<String, String, String, Object, Object> wf = new WorkflowWrapper<>(workflow);
         wf.setLogger(System.out::println);
 
         while (wf.notOnlyIn("approved")) {
@@ -43,7 +42,7 @@ public class VacationRequest {
     public void sampleVacationRequestWorkflowExecutorUsed() throws ValidatorFailed {
         Workflow<String, String, String, Object, Object> workflow = createWorkflow();
 
-        WorkflowWrapper wf = new WorkflowWrapper(workflow);
+        WorkflowWrapper<String, String, String, Object, Object> wf = new WorkflowWrapper<>(workflow);
         wf.setLogger(System.out::println);
 
         while (wf.notOnlyIn("approved")) {

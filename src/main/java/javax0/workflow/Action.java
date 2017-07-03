@@ -54,7 +54,7 @@ public interface Action<K, V, R, T, C> extends Named<R> {
      *
      * @return the step or workflow that the workflow is after performing the
      * action.
-     * @throws ValidatorFailed
+     * @throws ValidatorFailed if there is a validation error
      */
     default void perform() throws ValidatorFailed {
         T transientObject = performPre();
@@ -88,12 +88,7 @@ public interface Action<K, V, R, T, C> extends Named<R> {
      *
      * @param transientObject the transient state object returned by the pre-function
      * @param userInput       the user-input that was gathered after calling pre-function
-     * @return the workflow to which the action transfers from the old step. (Not
-     * all the workflow the workflow is in after the action, only the ones
-     * that replace the step we transit from.) It returns {@code null}
-     * if the action postFunction returned null. In that case the workflow
-     * the work flow is in remain the same.
-     * @throws ValidatorFailed
+     * @throws ValidatorFailed if the validation has failed
      */
    void performPost(T transientObject, Parameters<K,V> userInput)
             throws ValidatorFailed;

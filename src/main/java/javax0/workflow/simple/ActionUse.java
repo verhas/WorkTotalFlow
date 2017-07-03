@@ -76,7 +76,6 @@ public class ActionUse<K, V, R, T, C> implements Action<K, V, R, T, C> {
      *
      * @param transientObject
      * @param userInput
-     * @return
      * @throws ValidatorFailed
      */
     @Override
@@ -93,7 +92,7 @@ public class ActionUse<K, V, R, T, C> implements Action<K, V, R, T, C> {
         while (workflowIsInASingleStep() &&
                 (autoAction = oneSingleAutoStepFromThere()) != null) {
             transientObject = autoAction.performPre();
-            ((ActionUse) autoAction).validatePostAndMerge(transientObject, null);
+            ((ActionUse<K, V, R, T, C>) autoAction).validatePostAndMerge(transientObject, null);
         }
     }
 
