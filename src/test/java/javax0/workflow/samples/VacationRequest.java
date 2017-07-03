@@ -5,18 +5,69 @@ import javax0.workflow.Step;
 import javax0.workflow.Workflow;
 import javax0.workflow.exceptions.ValidatorFailed;
 import javax0.workflow.simple.WorkflowBuilder;
+import javax0.workflow.utils.Executor;
 import javax0.workflow.utils.WorkflowWrapper;
 import org.junit.Test;
 
 import java.util.function.Supplier;
 
-import static javax0.workflow.utils.WorkflowWrapper.actionsOf;
-
 public class VacationRequest {
 
     @Test
     public void sampleVacationRequestWorkflow() throws ValidatorFailed {
-        WorkflowBuilder<String, String, String, Object> wb = new WorkflowBuilder<>("OK");
+        Workflow<String, String, String, Object, Object> workflow = createWorkflow();
+
+        WorkflowWrapper wf = new WorkflowWrapper(workflow);
+        wf.setLogger(System.out::println);
+
+        while (wf.notOnlyIn("approved")) {
+            if (wf.isIn("start")) {
+                if (wf.canExecute("submit")) {// condition says it can be submitted
+                    wf.execute();
+                }
+            }
+            if (wf.isIn("RM approval pending")) {
+                if (wf.canExecute("approve")) {// condition says it can be submitted
+                    wf.execute();
+                }
+            }
+            if (wf.isIn("PM approval pending")) {
+                if (wf.canExecute("approve")) {// condition says it can be submitted
+                    wf.execute();
+                }
+            }
+        }
+    }
+
+    @Test
+    public void sampleVacationRequestWorkflowExecutorUsed() throws ValidatorFailed {
+        Workflow<String, String, String, Object, Object> workflow = createWorkflow();
+
+        WorkflowWrapper wf = new WorkflowWrapper(workflow);
+        wf.setLogger(System.out::println);
+
+        while (wf.notOnlyIn("approved")) {
+
+            if (wf.isIn("start")) {
+                if (wf.canExecute("submit")) {// condition says it can be submitted
+                    wf.execute();
+                }
+            }
+            if (wf.isIn("RM approval pending")) {
+                if (wf.canExecute("approve")) {// condition says it can be submitted
+                    wf.execute();
+                }
+            }
+            if (wf.isIn("PM approval pending")) {
+                if (wf.canExecute("approve")) {// condition says it can be submitted
+                    wf.execute();
+                }
+            }
+        }
+    }
+
+    private Workflow<String, String, String, Object, Object> createWorkflow() {
+        WorkflowBuilder<String, String, String, Object, Object> wb = new WorkflowBuilder<>("OK");
         /* TODO create a builder that converts a string of the following form to builder calls
         start -> submit -> RM approval pending, PM approval pending
               -> withdraw -> withdrawn
@@ -42,36 +93,15 @@ public class VacationRequest {
                 .preFunction((action) -> null)
                 .condition((action) -> true)
                 .postFunction((action, t, user) -> {
-                    Step<String, String, String, Object> step = action.getStep();
-                    Workflow<String, String, String, Object> workflow = step.getWorkflow();
-                    Supplier<Result<String, String, String, Object>> supplier = workflow.result(action, "OK");
+                    Step<String, String, String, Object, Object> step = action.getStep();
+                    Workflow<String, String, String, Object, Object> workflow = step.getWorkflow();
+                    Supplier<Result<String, String, String, Object, Object>> supplier = workflow.result(action, "OK");
                     return supplier.get();
                 })
                 .validator((action, t, user) -> true)
         ;
 
-        Workflow<String, String, String, Object> workflow = wb.start("start");
-
-        WorkflowWrapper wf = new WorkflowWrapper(workflow);
-        wf.setLogger(System.out::println);
-
-        while (wf.notOnlyIn("approved")) {
-            if (wf.isIn("start")) {
-                if (wf.canExecute("submit")) {// condition says it can be submitted
-                    wf.execute();
-                }
-            }
-            if (wf.isIn("RM approval pending")) {
-                if (wf.canExecute("approve")) {// condition says it can be submitted
-                    wf.execute();
-                }
-            }
-            if (wf.isIn("PM approval pending")) {
-                if (wf.canExecute("approve")) {// condition says it can be submitted
-                    wf.execute();
-                }
-            }
-        }
+        return wb.start("start");
     }
 
 }

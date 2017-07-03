@@ -3,8 +3,41 @@ package javax0.workflow;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+/**
+ * There are four functional interfaces that are used in an action in the workflow.
+ * <ol>
+ * <li>
+ * Before an action can be executed the {@link Condition} predicate is evaluated. If the method
+ * {@link Condition#test(Object)} returns false the action can not be further executed at that
+ * certain point.
+ * </li>
+ * <li>
+ * If an action can be executed then the {@link Pre} function is evaluated. This function is used to execute code
+ * that is needed to present the user the input he/she has to provide. This functionality could also be
+ * implemented in the condition but this way the model is cleaner and it also inherently provides faster performance.
+ * Conditions should focus on the executability of the action and nothing else. The pre function returns a
+ * transient object. The workflow treats this object transparent. The workflow does not do anything with this
+ * object, it only passes it on to the post function.
+ * </li>
+ * <li>
+ * The validator {@link Validator#test(Action, Object, Parameters)} is executed before the post function. If there is
+ * any invalidity in the parameters, the current action and the transient object the pre function returned then the
+ * validator has to return false and in that case the action will not be performed.
+ * </li>
+ * <li>
+ * The post functoin {@link Post#apply(Action, Object, Parameters)} is executed to make the transition from the
+ * step that the action was starting from to the step or steps the post function result suggests. At the same time
+ * if there is any database, back-end or any other action that has to be performed then the post function is the place
+ * for that. If any of these back-end functionalities can not be performed then the post function should return a
+ * result that will signal that. In the simplest case the result will replace the step from which the action was
+ * started by itself. It is not recommended to perform the transactions in the validator and signal failure as a
+ * validation error because workflow implementation may call validators multiple time. Post functions are invoked
+ * only once for each action execution.
+ * </li>
+ * </ol>
+ */
 public interface Functions {
-    interface Post<K, V, R, T> {
+    interface Post<K, V, R, T, C> {
 
         /**
          * Execute the post function.
@@ -15,8 +48,8 @@ public interface Functions {
          * @param userInput       the user input
          * @return the result of the action
          */
-        Result<K, V, R, T> apply(Action<K, V, R, T> action, T transientObject,
-                     Parameters<K,V> userInput);
+        Result<K, V, R, T, C> apply(Action<K, V, R, T, C> action, T transientObject,
+                                    Parameters<K, V> userInput);
     }
 
     /**
@@ -34,7 +67,7 @@ public interface Functions {
      * servlet container session and if the environment is clustered the object
      * may not travel from one node to the other.
      */
-    interface Pre<K, V, R, T> extends Function<Action<K, V, R, T>, T> {
+    interface Pre<K, V, R, T, C> extends Function<Action<K, V, R, T, C>, T> {
 
     }
 
@@ -49,7 +82,7 @@ public interface Functions {
      *
      * @author Peter Verhas
      */
-    interface Validator<K, V, R, T> {
+    interface Validator<K, V, R, T, C> {
 
         /**
          * Decides whether the user input is valid for the action.
@@ -59,8 +92,8 @@ public interface Functions {
          * @param userInput       the user input provided by the user
          * @return true if the user input is acceptable and false if it is erroneous
          */
-        boolean test(Action<K, V, R, T> action, T transientObject,
-                            Parameters<K, V> userInput);
+        boolean test(Action<K, V, R, T, C> action, T transientObject,
+                     Parameters<K, V> userInput);
     }
 
     /**
@@ -84,7 +117,7 @@ public interface Functions {
      * in the time between the action was listed for execution and the
      * action was selected by the user.)
      */
-    interface Condition<K, V, R, T> extends Predicate<Action<K, V, R, T>> {
+    interface Condition<K, V, R, T, C> extends Predicate<Action<K, V, R, T, C>> {
 
     }
 }

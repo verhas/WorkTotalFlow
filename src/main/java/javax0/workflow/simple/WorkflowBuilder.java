@@ -8,17 +8,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class WorkflowBuilder<K, V, R, T> {
+public class WorkflowBuilder<K, V, R, T, C> {
 
-    private final ResultSupplier<K, V, R, T> resultSupplier = new ResultSupplier<>();
-    private final Workflow<K, V, R, T> workflow =
+    private final ResultSupplier<K, V, R, T, C> resultSupplier = new ResultSupplier<>();
+    private final Workflow<K, V, R, T, C> workflow =
             new WorkflowImpl<>(resultSupplier::supplier);
-    private final Results<K, V, R, T> results = new Results<>();
+    private final Results<K, V, R, T, C> results = new Results<>();
     R defaultName;
-    ActionDefs<K, V, R, T> actions = new ActionDefs<>();
-    Steps<K, V, R, T> steps = new Steps<>(workflow);
-    ResultMap<K, V, R, T> resultMapping = new ResultMap<>(actions, results, steps);
-    private Map<R, ActionDefBuilder<K, V, R, T>> pendingActionBuilders = new HashMap<>();
+    ActionDefs<K, V, R, T, C> actions = new ActionDefs<>();
+    Steps<K, V, R, T, C> steps = new Steps<>(workflow);
+    ResultMap<K, V, R, T, C> resultMapping = new ResultMap<>(actions, results, steps);
+    private Map<R, ActionDefBuilder<K, V, R, T, C>> pendingActionBuilders = new HashMap<>();
 
     public WorkflowBuilder(R defaultName) {
         this.defaultName = defaultName;
@@ -29,7 +29,7 @@ public class WorkflowBuilder<K, V, R, T> {
     }
 
     @SafeVarargs
-    public final Workflow<K, V, R, T> start(R... startSteps) {
+    public final Workflow<K, V, R, T, C> start(R... startSteps) {
         checkActionsAreDefined();
         buildActions();
         createSteps();
@@ -40,10 +40,10 @@ public class WorkflowBuilder<K, V, R, T> {
     }
 
     private void prepareResultSupplier() {
-        for (MapTuple<K, V, R, T> key : resultMapping.keySet()) {
-            ActionDef<K, V, R, T> action = actions.get(key.action.name);
-            Step<K, V, R, T> step = steps.get(key.step.name);
-            ResultImpl<K, V, R, T> result = new ResultImpl<>();
+        for (MapTuple<K, V, R, T, C> key : resultMapping.keySet()) {
+            ActionDef<K, V, R, T, C> action = actions.get(key.action.name);
+            Step<K, V, R, T, C> step = steps.get(key.step.name);
+            ResultImpl<K, V, R, T, C> result = new ResultImpl<>();
             result.getSteps().addAll(
                     resultMapping.get(key.step.name, key.action.name, key.result.name)
                             .stream()
@@ -55,7 +55,7 @@ public class WorkflowBuilder<K, V, R, T> {
     }
 
     private void buildActions() {
-        for (final ActionDefBuilder<K, V, R, T> builder : pendingActionBuilders.values()) {
+        for (final ActionDefBuilder<K, V, R, T, C> builder : pendingActionBuilders.values()) {
             builder.build(actions);
         }
     }
@@ -67,7 +67,7 @@ public class WorkflowBuilder<K, V, R, T> {
     }
 
     private void checkActionsAreDefined() {
-        for (final ActionDefBuilder<K, V, R, T> builder : pendingActionBuilders.values()) {
+        for (final ActionDefBuilder<K, V, R, T, C> builder : pendingActionBuilders.values()) {
             if (!actions.containsKey(builder.name)) {
                 throw new IllegalArgumentException(String.format("Action '%s' defined but not used.", builder.name));
             }
@@ -88,13 +88,13 @@ public class WorkflowBuilder<K, V, R, T> {
         pendingActionBuilders = null;
     }
 
-    public TransitionBuilder<K, V, R, T> from(R name) {
+    public TransitionBuilder<K, V, R, T, C> from(R name) {
         steps.get(name);
         return new TransitionBuilder<>(this, name);
     }
 
-    public ActionDefBuilder<K, V, R, T> action(R name) {
-        final ActionDefBuilder<K, V, R, T> ab = new ActionDefBuilder<>(workflow, defaultName, name);
+    public ActionDefBuilder<K, V, R, T, C> action(R name) {
+        final ActionDefBuilder<K, V, R, T, C> ab = new ActionDefBuilder<>(workflow, defaultName, name);
         pendingActionBuilders.put(name, ab);
         return ab;
     }

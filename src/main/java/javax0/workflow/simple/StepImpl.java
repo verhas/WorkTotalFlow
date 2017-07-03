@@ -7,32 +7,34 @@ import javax0.workflow.Workflow;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.stream.Collectors;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 /**
  * @author Peter Verhas
  */
-public class StepImpl<K, V, R, T> extends Named<R> implements Step<K, V, R, T> {
+public class StepImpl<K, V, R, T, C> extends Named<R> implements Step<K, V, R, T, C> {
 
-    private final Workflow<K, V, R, T> workflow;
-    final Collection<Action<K, V, R, T>> actions;
+    final Collection<Action<K, V, R, T, C>> actions;
+    private final Workflow<K, V, R, T, C> workflow;
 
-    public StepImpl(Workflow<K, V, R, T> workflow) {
+    public StepImpl(Workflow<K, V, R, T, C> workflow) {
         this.workflow = workflow;
         this.actions = new HashSet<>();
     }
 
-    public Workflow<K, V, R, T> getWorkflow() {
+    public Workflow<K, V, R, T, C> getWorkflow() {
         return workflow;
     }
 
     @Override
-    public Collection<Action<K, V, R, T>> getActions() {
-        return actions.stream().filter(Action::available).collect(Collectors.toSet());
+    public Stream<Action<K, V, R, T, C>> getActions(Predicate<Action<K, V, R, T, C>> p) {
+        return actions.stream().filter(p).filter(Action::available);
     }
+
     @Override
-    public String toString(){
-        return "Step["+getName()+"]";
+    public String toString() {
+        return "Step[" + getName() + "]";
     }
 
 }

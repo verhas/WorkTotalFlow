@@ -3,12 +3,13 @@ package javax0.workflow;
 import javax0.workflow.exceptions.ValidatorFailed;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.function.Supplier;
 
 /**
  * @author verhas
  */
-public interface Action<K, V, R, T> extends Named<R> {
+public interface Action<K, V, R, T, C> extends Named<R> {
 
     /**
      * When an action is automatic it is executed immediately without waiting from external trigger.
@@ -24,16 +25,17 @@ public interface Action<K, V, R, T> extends Named<R> {
      *
      * @return the step this action can be executed from
      */
-    Step<K, V, R, T> getStep();
+    Step<K, V, R, T, C> getStep();
 
     /**
      * @return true if the action can be processed. This usually true when the condition
-     * associated to the action evaluates to true.
+     * associated to the action evaluates to true. Some implementation may put exctra conditions on some
+     * actions in addition to the condition result.
      */
     boolean available();
 
 
-    default Supplier<? extends Result<K, V, R, T>> result(R key) {
+    default Supplier<? extends Result<K, V, R, T, C>> result(R key) {
         return getStep().getWorkflow().result(this, key);
     }
 
@@ -121,7 +123,13 @@ public interface Action<K, V, R, T> extends Named<R> {
      *
      * @param steps the workflow to join.
      */
-    void join(Collection<Step<K, V, R, T>> steps);
+    default void join(Collection<Step<K, V, R, T, C>> steps) {
+        final Collection<Step<K, V, R, T, C>> stepSet = new HashSet<>();
+        final Workflow<K, V, R, T, C> workflow = getStep().getWorkflow();
+        stepSet.addAll(workflow.getSteps());
+        stepSet.removeAll(steps);
+        workflow.setSteps(stepSet);
+    }
 
     Parameters<K, V> getParameters();
 }

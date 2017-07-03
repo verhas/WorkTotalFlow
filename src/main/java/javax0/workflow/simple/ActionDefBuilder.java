@@ -6,16 +6,21 @@ import javax0.workflow.Workflow;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ActionDefBuilder<K, V, R, T> {
+public class ActionDefBuilder<K, V, R, T, C> {
     final R name;
     private final Map<K, V> parameters = new HashMap<>();
-    private Functions.Pre<K, V, R, T> pre = action -> null;
-    private Functions.Post<K, V, R, T> post;
-    private Functions.Condition<K, V, R, T> condition = action -> true;
-    private Functions.Validator<K, V, R, T> validator = (action, t, user) -> true;
+    private Functions.Pre<K, V, R, T, C> pre = action -> null;
+    private Functions.Post<K, V, R, T, C> post;
+    private Functions.Condition<K, V, R, T, C> condition = action -> true;
+    private Functions.Validator<K, V, R, T, C> validator = (action, t, user) -> true;
 
-    public void build(ActionDefs<K,V,R,T> actions){
-        ActionDef<K,V,R,T> def = actions.get(name);
+    public ActionDefBuilder(Workflow<K, V, R, T, C> workflow, R defaultResult, R name) {
+        this.name = name;
+        post = (action, t, user) -> workflow.result(action, defaultResult).get();
+    }
+
+    public void build(ActionDefs<K, V, R, T, C> actions) {
+        ActionDef<K, V, R, T, C> def = actions.get(name);
         def.condition = condition;
         def.parameters = parameters::get;
         def.post = post;
@@ -23,40 +28,35 @@ public class ActionDefBuilder<K, V, R, T> {
         def.validator = validator;
     }
 
-    public ActionDefBuilder(Workflow<K, V, R, T> workflow, R defaultResult, R name) {
-        this.name = name;
-        post = (action, t, user) -> workflow.result(action, defaultResult).get();
-    }
-
-    public ActionDefBuilder<K, V, R, T> validator(Functions.Validator<K, V, R, T> validator) {
+    public ActionDefBuilder<K, V, R, T, C> validator(Functions.Validator<K, V, R, T, C> validator) {
         this.validator = validator;
         return this;
     }
 
-    public ActionDefBuilder<K, V, R, T> condition(Functions.Condition<K, V, R, T> condition) {
+    public ActionDefBuilder<K, V, R, T, C> condition(Functions.Condition<K, V, R, T, C> condition) {
         this.condition = condition;
         return this;
     }
 
-    public ActionDefBuilder<K, V, R, T> preFunction(Functions.Pre<K, V, R, T> pre) {
+    public ActionDefBuilder<K, V, R, T, C> preFunction(Functions.Pre<K, V, R, T, C> pre) {
         this.pre = pre;
         return this;
     }
 
-    public ActionDefBuilder<K, V, R, T> postFunction(Functions.Post<K, V, R, T> post) {
+    public ActionDefBuilder<K, V, R, T, C> postFunction(Functions.Post<K, V, R, T, C> post) {
         this.post = post;
         return this;
     }
 
     @SafeVarargs
-    public final ActionDefBuilder<K, V, R, T> parameters(Map.Entry<K, V>... entries) {
+    public final ActionDefBuilder<K, V, R, T, C> parameters(Map.Entry<K, V>... entries) {
         for (final Map.Entry<K, V> entry : entries) {
             parameters.put(entry.getKey(), entry.getValue());
         }
         return this;
     }
 
-    public ActionDefBuilder<K, V, R, T> parameter(K k0, V v0) {
+    public ActionDefBuilder<K, V, R, T, C> parameter(K k0, V v0) {
         parameters.put(k0, v0);
         return this;
     }
