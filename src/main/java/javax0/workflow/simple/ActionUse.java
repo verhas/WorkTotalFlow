@@ -3,10 +3,7 @@ package javax0.workflow.simple;
 import javax0.workflow.*;
 import javax0.workflow.exceptions.ValidatorFailed;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -105,7 +102,9 @@ public class ActionUse<K, V, R, T, C> implements Action<K, V, R, T, C> {
     }
 
     private Stream<Action<K, V, R, T, C>> actionsStream() {
-        return getStep().getWorkflow().getSteps().stream().findAny().get().getActions();
+        final Optional<Step<K,V,R,T,C>> step;
+        return (step = getStep().getWorkflow().getSteps().stream().findAny()).isPresent() ?
+                step.get().getActions() : Stream.empty();
     }
 
     private boolean workflowIsInASingleStep() {
