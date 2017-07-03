@@ -150,6 +150,9 @@ public class WorkflowWrapper<K, V, R, T, C> {
             lastQueriedStep = step();
         }
         getLastQueriedActionId = action;
+        if( lastQueriedStep == null ){
+            throw new IllegalStateException("Calling 'canExecute(action)' while there is no step queried before");
+        }
         return lastQueriedStep.getActions(a -> a.getName().equals(action)).count() == 1;
     }
 
