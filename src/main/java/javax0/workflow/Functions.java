@@ -92,6 +92,7 @@ public interface Functions {
          * @param userInput       the user input provided by the user
          * @return true if the user input is acceptable and false if it is erroneous
          */
+        @SuppressWarnings("BooleanMethodIsAlwaysInverted")
         boolean test(Action<K, V, R, T, C> action, T transientObject,
                      Parameters<K, V> userInput);
     }

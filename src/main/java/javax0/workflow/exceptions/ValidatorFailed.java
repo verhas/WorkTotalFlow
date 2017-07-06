@@ -7,5 +7,5 @@ package javax0.workflow.exceptions;
  *
  * @author Peter Verhas
  */
-public class ValidatorFailed extends Exception{
+public class ValidatorFailed extends RuntimeException {
 }

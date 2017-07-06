@@ -6,12 +6,13 @@ import javax0.workflow.Workflow;
 import javax0.workflow.exceptions.ValidatorFailed;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class WorkflowWrapper<K, V, R, T, C> {
-    private final Workflow<K, V, R, T, C> workflow;
-    private Consumer<String> logger = (s) -> {
+    final Workflow<K, V, R, T, C> workflow;
+    Consumer<String> logger = (s) -> {
     };
     private R lastQueriedStepId = null;
     private Step<K, V, R, T, C> lastQueriedStep = null;
@@ -150,10 +151,14 @@ public class WorkflowWrapper<K, V, R, T, C> {
             lastQueriedStep = step();
         }
         getLastQueriedActionId = action;
-        if( lastQueriedStep == null ){
+        if (lastQueriedStep == null) {
             throw new IllegalStateException("Calling 'canExecute(action)' while there is no step queried before");
         }
-        return lastQueriedStep.getActions(a -> a.getName().equals(action)).count() == 1;
+        return lastQueriedStep.getActions(a -> a.getName().equals(action)).findAny().isPresent();
+    }
+
+    public Action<K, V, R, T, C> action() {
+        return lastQueriedStep.getActions(a -> a.getName().equals(getLastQueriedActionId)).findAny().orElse(null);
     }
 
     /**
@@ -164,6 +169,7 @@ public class WorkflowWrapper<K, V, R, T, C> {
      * steps as well not listed in the argument, so this check does not require that the workflow is exactly in these
      * steps.
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     @SafeVarargs
     public final boolean isIn(R... steps) {
         Collection<R> stepNames = stepsOf(workflow);
@@ -246,6 +252,7 @@ public class WorkflowWrapper<K, V, R, T, C> {
 
         /**
          * Execute the action
+         *
          * @param id is the name of the action
          * @throws ValidatorFailed when the validator defined in the action fails.
          */

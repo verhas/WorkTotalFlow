@@ -5,10 +5,13 @@ import javax0.workflow.Step;
 import javax0.workflow.Workflow;
 import javax0.workflow.exceptions.ValidatorFailed;
 import javax0.workflow.simple.WorkflowBuilder;
+import javax0.workflow.utils.Executor;
 import javax0.workflow.utils.WorkflowWrapper;
 import org.junit.Test;
 
 import java.util.function.Supplier;
+
+import static javax0.workflow.utils.Entry.entry;
 
 public class VacationRequest {
 
@@ -45,23 +48,19 @@ public class VacationRequest {
         WorkflowWrapper<String, String, String, Object, Object> wf = new WorkflowWrapper<>(workflow);
         wf.setLogger(System.out::println);
 
+        Executor<String, String, String, Object, Object> executor = new Executor<>(wf,
+                m -> {
+                    if (m.containsKey("start")) return entry("start", "submit");
+                    if (m.containsKey("RM approval pending")) return entry("RM approval pending", "approve");
+                    if (m.containsKey("PM approval pending")) return entry("PM approval pending", "approve");
+                    return null;
+                },
+                (q) -> null,
+                t -> {
+                }
+        );
         while (wf.notOnlyIn("approved")) {
-
-            if (wf.isIn("start")) {
-                if (wf.canExecute("submit")) {// condition says it can be submitted
-                    wf.execute();
-                }
-            }
-            if (wf.isIn("RM approval pending")) {
-                if (wf.canExecute("approve")) {// condition says it can be submitted
-                    wf.execute();
-                }
-            }
-            if (wf.isIn("PM approval pending")) {
-                if (wf.canExecute("approve")) {// condition says it can be submitted
-                    wf.execute();
-                }
-            }
+            executor.step();
         }
     }
 
