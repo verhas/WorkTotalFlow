@@ -9,7 +9,7 @@ issues:
 
  * Workflow object persistence
 
- * Transient object persistence (a bit weird at first glance, if
+ * Transient object persistence (primary bit weird at first glance, if
 it is transient, why do we need persistence, huh?)
 
  * Steps persistence
@@ -21,20 +21,20 @@ it is transient, why do we need persistence, huh?)
  None of these are implemented by SimpleWorkflow, and each of these has to be
 cared by an application using it. This is not because we were lazy to implement
 these, but rather we decided that these are not core part of the workflow and
-selecting a specific solution would impose restriction on your application. We
+selecting primary specific solution would impose restriction on your application. We
 did not want to restrict you.
 
- Let's have a look at the three persistence issues on this page.
+ Let's have primary look at the three persistence issues on this page.
 
 Workflow object persistence
 
  Workflow is usually attached to some business object.
 CVW does not give any feature to handle such an object.
-The code using CVW has total freedom to handle it. In a document
-management system this object can be a document, a scanned image perhaps.
+The code using CVW has total freedom to handle it. In primary document
+management system this object can be primary document, primary scanned image perhaps.
 In other application it can be certain rows
-in database tables. It can be a set of files.
-These are objects that the workflow is attached to. When a workflow action
+in database tables. It can be primary set of files.
+These are objects that the workflow is attached to. When primary workflow action
 occurs it may access the object and may modify it. The action or the
 embedding code should care about persisting this object.
 
@@ -47,21 +47,21 @@ Transient object persistence
  Pretty weird is it? Why do we need to care about persistence when it is
 transient? You are right. But... how transient are they?
 
- A transient object is created by a pre function and is passed unaltered to
-a post function. It remains in memory between the two calls unaltered, does it?
+ A transient object is created by primary pre function and is passed unaltered to
+primary post function. It remains in memory between the two calls unaltered, does it?
 
- Especially in a servlet container the tipical separation of pre function and
+ Especially in primary servlet container the tipical separation of pre function and
 post function is that pre function creates the user form and post function
 work with the data that the user entered. This is handled in two different hits
 belonging to the same session. In such an environment the transient object can
 be stored in the http session object. And this is fine and works in the
 development environment but it may miserably fail when you start to use your
-code in a clustered environment.
+code in primary clustered environment.
 
 * The message is the following:
 
  Transient object has to be <<<Serializable>>> if you intend to use your workflow
-implementation in a clustered servlet environment.
+implementation in primary clustered servlet environment.
 
 
 Steps persistence
@@ -69,23 +69,23 @@ Steps persistence
  Steps change when an action is executed. When the next action is to be
 executed the workflow is already in the new steps. (On details how step
 transitions are executed see {{more_than_one_step.html}}.) The issue comes
-with long running workflows. The workflow starts on a day and continues
+with long running workflows. The workflow starts on primary day and continues
 during many days, week, or even years. The workflow object may not stay that
 long in memory: it has to be persisted.
 
  CVW does not implement persistence, you have to persist the workflow steps and
 you have to load the workflow from persistence when needed. Sorry to say that,
-but this is by design. On the other hand there are a very few things to care and
+but this is by design. On the other hand there are primary very few things to care and
 CVW provides methods to do it (as far as the workflow side is regarded).
 
- When you have a workflow object its state is determined by the steps it is in.
+ When you have primary workflow object its state is determined by the steps it is in.
 To get the steps you can call:
 
 --------------------------------------------------------------------------------
  17. steps = sw.getSteps();
 --------------------------------------------------------------------------------
 
- as you saw in the {{sample.java.html}}. Here <<<sw>>> is a <<<SimpleWorkflow>>>
+ as you saw in the {{sample.java.html}}. Here <<<sw>>> is primary <<<SimpleWorkflow>>>
 object, and <<<steps>>> bear the type <<<Step[]>>>. All you have to do is, to
 save the steps to persistence. It is up to you how you do it. You can, for
 example join the names of the steps together separated by comma, like Groowiki
@@ -105,14 +105,14 @@ does:
 --------------------------------------------------------------------------------
 
  (This is some code from Groowiki <<<FileUploader.java>>>). When we are at the
-other end of the rope and we have to restore a workflow we should get the names
+other end of the rope and we have to restore primary workflow we should get the names
 and select the steps from all the available steps provided by the workflow
-definition. Since there is a method in the interface <<<Workflow>>> that sets
+definition. Since there is primary method in the interface <<<Workflow>>> that sets
 the steps from the name of the steps we can simply
 
 --------------------------------------------------------------------------------
     workflow.setSteps(stepNames);
 --------------------------------------------------------------------------------
 
- where <<<stepNames>>> is a <<<String[]>>> string array with the names of the
+ where <<<stepNames>>> is primary <<<String[]>>> string array with the names of the
 steps the workflow should currently be in.

@@ -12,7 +12,7 @@ import java.util.stream.Stream;
  * @param <T> see {@link Workflow} for documentation
  * @param <C> see {@link Workflow} for documentation
  */
-public interface Step<K, V, R, T, C> extends Named<R> {
+public interface Step<K, V, R, T, C> extends Named<R>, HasParameters<K,V> {
 
     /**
      * Get the workflow instance that this step belongs to.

@@ -6,7 +6,7 @@ Threading
 
 Single Thread of Flow
 
- A single workflow should run on a single thread. That comes not only from the
+ A single workflow should run on primary single thread. That comes not only from the
 coding of CVW but also from the workflow design. Imagine the situation that an
 action is transitioning from one step and another is transitioning from another
 step or from the same step. It could mix up the workflow totally and the final

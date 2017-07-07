@@ -2,6 +2,7 @@ package javax0.workflow.simple;
 
 
 import javax0.workflow.Action;
+import javax0.workflow.Parameters;
 import javax0.workflow.Step;
 import javax0.workflow.Workflow;
 
@@ -11,18 +12,26 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
- * @author Peter Verhas
+ * Simple implementation of the interface {@link Step}
+ *
+ * @param <K> see {@link Workflow} for documentation
+ * @param <V> see {@link Workflow} for documentation
+ * @param <R> see {@link Workflow} for documentation
+ * @param <T> see {@link Workflow} for documentation
+ * @param <C> see {@link Workflow} for documentation
  */
 public class StepImpl<K, V, R, T, C> extends Named<R> implements Step<K, V, R, T, C> {
 
     final Collection<Action<K, V, R, T, C>> actions;
     private final Workflow<K, V, R, T, C> workflow;
+    Parameters<K, V> parameters =  k -> null ;
 
-    public StepImpl(Workflow<K, V, R, T, C> workflow) {
+    StepImpl(Workflow<K, V, R, T, C> workflow) {
         this.workflow = workflow;
         this.actions = new HashSet<>();
     }
 
+    @Override
     public Workflow<K, V, R, T, C> getWorkflow() {
         return workflow;
     }
@@ -37,4 +46,8 @@ public class StepImpl<K, V, R, T, C> extends Named<R> implements Step<K, V, R, T
         return "Step[" + getName() + "]";
     }
 
+    @Override
+    public Parameters<K, V> getParameters() {
+        return parameters;
+    }
 }

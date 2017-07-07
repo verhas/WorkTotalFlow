@@ -24,13 +24,15 @@ import java.util.function.Supplier;
 public interface Workflow<K, V, R, T, C> {
 
     /**
-     * Get a result supplier based on the name of the result and the action this result originates from.
      * <p>
-     * This method is usually called by post functions. Post functions do not need to handle the
-     * actual workflow objects. On the abstraction level of the post functions the result can be as
-     * simple as a string. On the other hand the results driving the transitions in the workflow are
-     * objects. This method returns a supplier that will return the object for the given result name
-     * from an action.
+     * Get a result supplier based on the name of the result and the action this result originates from.
+     * </p>
+     * <p>
+     * Post functions are NOT supposed to call this method. They are supposed to call the method with the
+     * same name defined in the {@link Action} interface. The default implemenation of that method calls this
+     * method providing a unified result lookup for the whole workflow. On the other hand calling the method
+     * defined in {@link Action} also works when the actual implementation of the {@link Action} overrides the
+     * default implementation and provide different result object / name mapping for different actions.
      * </p>
      * <p>
      * The actual action is needed as an argument because there can be several result objects
@@ -38,13 +40,6 @@ public interface Workflow<K, V, R, T, C> {
      * "TRANSACTION OK" and there can be many steps that have results with this name. It would be
      * burdensome to have results with name "action 1 is OK", "action 2 is OK" or something similar
      * encoding the name of the action into the name of the result.
-     * </p>
-     * <p>
-     * For most of the applications the mapping between the action and the name of the result is
-     * static. It is represented usually by a map assigning a result and thus a collection of steps
-     * where the workflow will go to an action,R pair. However the actual implementation is not
-     * restricted to be static. The supplier returned by this method may decide from time to time
-     * which result object to return for the same name.
      * </p>
      *
      * @param action that is executing at the time this method is called.
@@ -72,6 +67,7 @@ public interface Workflow<K, V, R, T, C> {
 
     /**
      * Set the workflow's context object.
+     *
      * @param context the context object
      */
     void setContext(C context);

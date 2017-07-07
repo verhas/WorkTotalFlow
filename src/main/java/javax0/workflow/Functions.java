@@ -37,6 +37,16 @@ import java.util.function.Predicate;
  * </ol>
  */
 public interface Functions {
+    /**
+     * Functional interface mapping action, transient object and user input parameters to result.
+     *
+     * @param <K> see {@link Workflow} for documentation
+     * @param <V> see {@link Workflow} for documentation
+     * @param <R> see {@link Workflow} for documentation
+     * @param <T> see {@link Workflow} for documentation
+     * @param <C> see {@link Workflow} for documentation
+     */
+    @FunctionalInterface
     interface Post<K, V, R, T, C> {
 
         /**
@@ -66,7 +76,14 @@ public interface Functions {
      * to different http hits. The {@code transientObject} may be stored in the
      * servlet container session and if the environment is clustered the object
      * may not travel from one node to the other.
+     *
+     * @param <K> see {@link Workflow} for documentation
+     * @param <V> see {@link Workflow} for documentation
+     * @param <R> see {@link Workflow} for documentation
+     * @param <T> see {@link Workflow} for documentation
+     * @param <C> see {@link Workflow} for documentation
      */
+    @FunctionalInterface
     interface Pre<K, V, R, T, C> extends Function<Action<K, V, R, T, C>, T> {
 
     }
@@ -80,8 +97,13 @@ public interface Functions {
      * There is no guarantee that a validator is called only once performing an action.
      * An application is allowed to forget the result of the validator and call it several times.
      *
-     * @author Peter Verhas
+     * @param <K> see {@link Workflow} for documentation
+     * @param <V> see {@link Workflow} for documentation
+     * @param <R> see {@link Workflow} for documentation
+     * @param <T> see {@link Workflow} for documentation
+     * @param <C> see {@link Workflow} for documentation
      */
+    @FunctionalInterface
     interface Validator<K, V, R, T, C> {
 
         /**
@@ -117,7 +139,14 @@ public interface Functions {
      * allowed by the condition or because the conditions may have changed
      * in the time between the action was listed for execution and the
      * action was selected by the user.)
+     *
+     * @param <K> see {@link Workflow} for documentation
+     * @param <V> see {@link Workflow} for documentation
+     * @param <R> see {@link Workflow} for documentation
+     * @param <T> see {@link Workflow} for documentation
+     * @param <C> see {@link Workflow} for documentation
      */
+    @FunctionalInterface
     interface Condition<K, V, R, T, C> extends Predicate<Action<K, V, R, T, C>> {
 
     }

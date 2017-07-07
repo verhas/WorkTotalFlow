@@ -7,6 +7,22 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Implement the functionality of the {@link Action} interface that is tied to a specific transition. An action is
+ * composed of an {@link ActionDef} and an {@link ActionUse}. The {@link ActionUse} implements the interface and
+ * delegates some of the functionality to {@link ActionDef}.
+ * <p>
+ * One action can be used to initiate transition from many steps. This is implemented in a way that the part of the
+ * functionality that is tied to a specific transition is in {@link ActionUse}. Several {@link ActionUse}
+ * objects may refer to the same {@link ActionDef}.
+ * </p>
+ *
+ * @param <K> see {@link Workflow} for documentation
+ * @param <V> see {@link Workflow} for documentation
+ * @param <R> see {@link Workflow} for documentation
+ * @param <T> see {@link Workflow} for documentation
+ * @param <C> see {@link Workflow} for documentation
+ */
 public class ActionUse<K, V, R, T, C> implements Action<K, V, R, T, C> {
     final ActionDef<K, V, R, T, C> actionDef;
     private final Step<K, V, R, T, C> step;
@@ -15,19 +31,52 @@ public class ActionUse<K, V, R, T, C> implements Action<K, V, R, T, C> {
     private Map<K, V> parameters;
     private Parameters<K, V> merged;
 
-    public ActionUse(Step<K, V, R, T, C> step, ActionDef<K, V, R, T, C> actionDef) {
+    /**
+     * Create a new action implemented as {@link ActionUse} that starts from the step {@code step} and uses the
+     * definition of {@code actionDef}.
+     *
+     * @param step      the step from which this action starts from
+     * @param actionDef the definition of the action
+     */
+    private ActionUse(Step<K, V, R, T, C> step, ActionDef<K, V, R, T, C> actionDef) {
         this(step, actionDef, null, false);
     }
 
-    public ActionUse(Step<K, V, R, T, C> step, ActionDef<K, V, R, T, C> actionDef, Parameters<K, V> parameters) {
+    /**
+     * Create a new action implemented as {@link ActionUse}.
+     *
+     * @param step       see {@link #ActionUse(Step, ActionDef)}
+     * @param actionDef  see {@link #ActionUse(Step, ActionDef)}
+     * @param parameters the parameters of the action. Note that the {@link ActionDef} can also have parameters and the
+     *                   parameters of the action are the merge of the two.
+     */
+    ActionUse(Step<K, V, R, T, C> step, ActionDef<K, V, R, T, C> actionDef, Parameters<K, V> parameters) {
         this(step, actionDef, parameters, false);
     }
 
-    public ActionUse(Step<K, V, R, T, C> step, ActionDef<K, V, R, T, C> actionDef, Parameters<K, V> parameters, Result<K, V, R, T, C> autoResult) {
+    /**
+     * @param step       see {@link #ActionUse(Step, ActionDef)}
+     * @param actionDef  see {@link #ActionUse(Step, ActionDef)}
+     * @param parameters see {@link #ActionUse(Step, ActionDef, Parameters)}
+     * @param autoResult the result that this action has. This is used when the action does not have post function that
+     *                   would return a result. In that case the workflow is transferred to the steps specified by the
+     *                   autoresult. The model does not even use a result in this case, but the implementation is
+     *                   that there is an autoResult which is used if there is no other source of result.
+     */
+    ActionUse(Step<K, V, R, T, C> step, ActionDef<K, V, R, T, C> actionDef, Parameters<K, V> parameters, Result<K, V, R, T, C> autoResult) {
         this(step, actionDef, parameters, true);
         this.autoResult = autoResult;
     }
 
+    /**
+     * Create an action.
+     *
+     * @param step       see {@link #ActionUse(Step, ActionDef)}
+     * @param actionDef  see {@link #ActionUse(Step, ActionDef)}
+     * @param parameters see {@link #ActionUse(Step, ActionDef, Parameters)}
+     * @param auto       true if the action has to be executed automatically. (In that case there can not be any result, the
+     *                   result is "autoResult" (see {@link #ActionUse(Step, ActionDef, Parameters, Result)})
+     */
     private ActionUse(Step<K, V, R, T, C> step, ActionDef<K, V, R, T, C> actionDef, Parameters<K, V> parameters, boolean auto) {
         this.step = step;
         this.actionDef = actionDef;
@@ -80,11 +129,12 @@ public class ActionUse<K, V, R, T, C> implements Action<K, V, R, T, C> {
      * Perform the post action of the workflow from step {@code step}
      * through the action {@code action}.
      * <p>
-     * After the post function
+     * After the post function the implementation checks if there is any eligible auto action to be executed and if
+     * there is then it executes it.
      *
-     * @param transientObject
-     * @param userInput
-     * @throws ValidatorFailed
+     * @param transientObject see the documentation of the interface {@link Action}
+     * @param userInput  see the documentation of the interface {@link Action}
+     * @throws ValidatorFailed  see the documentation of the interface {@link Action}
      */
     @Override
     public void performPost(T transientObject, Parameters<K, V> userInput) throws ValidatorFailed {
@@ -93,20 +143,50 @@ public class ActionUse<K, V, R, T, C> implements Action<K, V, R, T, C> {
         executeAutoActions();
     }
 
+    /**
+     * Execute auto actions in a loop so long as long there is auto action to advance the state of the workflow
+     * or we get into an infinite loop.
+     *
+     * @throws ValidatorFailed see the documentation of the interface {@link Action}
+     */
     private void executeAutoActions() throws ValidatorFailed {
+        Set<Step<K, V, R, T, C>> visitedSteps = new HashSet<>();
         T transientObject;
         Action<K, V, R, T, C> autoAction;
         Collection<Action<K, V, R, T, C>> actions;
+        int limitCounter = 0;
         while (workflowIsInASingleStep() &&
                 (autoAction = oneSingleAutoStepFromThere()) != null) {
+            Step<K, V, R, T, C> visitedStep = autoAction.getStep();
+            checkInfiniteLoop(visitedSteps, visitedStep);
             transientObject = autoAction.performPre();
             ((ActionUse<K, V, R, T, C>) autoAction).validatePostAndMerge(transientObject, null);
         }
     }
 
+    /**
+     * Checks if we have already been in the step from which we want to step forward during transitioning along
+     * auto actions. If w have already been here then this is an infinite loop.
+     *
+     * @param visitedSteps the set of the steps that we have already visited during this auto action traversal
+     * @param visitedStep the current step from which we want to step forward
+     */
+    private void checkInfiniteLoop(Set<Step<K, V, R, T, C>> visitedSteps, Step<K, V, R, T, C> visitedStep) {
+        if (visitedSteps.contains(visitedStep)) {
+            throw new IllegalStateException("Probably infinite loop in auto actions");
+        }
+        visitedSteps.add(visitedStep);
+    }
+
+    /**
+     * Get at most two elements from the stream of actions and return the first if there is only one. If there are
+     * more than one elements then return null.
+     *
+     * @return the action to be executed automatically or null if there is no such action or there are more than one
+     * actions (even if some of them is auto).
+     */
     private Action<K, V, R, T, C> oneSingleAutoStepFromThere() {
-        Stream<Action<K, V, R, T, C>> actions = actionsStream().limit(2);
-        return actions.collect(Collectors.collectingAndThen(Collectors.toList(),
+        return actionsStream().limit(2).collect(Collectors.collectingAndThen(Collectors.toList(),
                 (List<Action<K, V, R, T, C>> list) ->
                         list.size() == 1 && list.get(0).isAuto() ? list.get(0) : null
         ));
@@ -157,11 +237,6 @@ public class ActionUse<K, V, R, T, C> implements Action<K, V, R, T, C> {
         getStep().getWorkflow().setSteps(stepSet);
     }
 
-    /**
-     * Joins the workflow passed as argument.
-     *
-     * @param steps
-     */
     @Override
     public void join(Collection<Step<K, V, R, T, C>> steps) {
         final Collection<Step<K, V, R, T, C>> stepSet = new HashSet<>();

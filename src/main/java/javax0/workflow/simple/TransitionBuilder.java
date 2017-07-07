@@ -6,7 +6,7 @@ import javax0.workflow.Result;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public class TransitionBuilder<K, V, R, T, C> {
+public class TransitionBuilder<K, V, R, T, C> extends ParametersBuilder<TransitionBuilder<K, V, R, T, C>, K, V> {
     private final WorkflowBuilder<K, V, R, T, C> builder;
     private final R step;
 
@@ -20,22 +20,24 @@ public class TransitionBuilder<K, V, R, T, C> {
         if (builder.defaultName == null) {
             throw new IllegalArgumentException("Can not use 'to(steps)' when there is no default name");
         }
-        final ActionDef<K, V, R, T, C> actionDef = builder.actions.get(builder.defaultName);
+        final ActionDef<K, V, R, T, C> actionDef = builder.actionDefFactory.get(builder.defaultName);
         final Parameters<K, V> defaultActionDefParameters = null;
         final Result<K, V, R, T, C> autoResult = new ResultImpl<>();
 
-        autoResult.getSteps().addAll(Arrays.stream(steps).map(builder.steps::get).collect(Collectors.toSet()));
+        autoResult.getSteps().addAll(Arrays.stream(steps).map(builder.stepFactory::get).collect(Collectors.toSet()));
 
-        final ActionUse<K, V, R, T, C> actionUse = new ActionUse<>(builder.steps.get(step), actionDef, defaultActionDefParameters, autoResult);
-        builder.steps.get(step).actions.add(actionUse);
+        builder.stepFactory.get(step).parameters = parameters::get;
+        final ActionUse<K, V, R, T, C> actionUse = new ActionUse<>(builder.stepFactory.get(step), actionDef, defaultActionDefParameters, autoResult);
+        builder.stepFactory.get(step).actions.add(actionUse);
         builder.resultMapping.put(step, builder.defaultName, builder.defaultName, steps);
         return TransitionBuilder.this;
     }
 
     public FunctionBuilder action(R name) {
-        ActionDef<K, V, R, T, C> actionDef = builder.actions.get(name);
-        ActionUse<K, V, R, T, C> actionUse = new ActionUse<>(builder.steps.get(step), actionDef, null);
-        builder.steps.get(step).actions.add(actionUse);
+        ActionDef<K, V, R, T, C> actionDef = builder.actionDefFactory.get(name);
+        builder.stepFactory.get(step).parameters = parameters::get;
+        ActionUse<K, V, R, T, C> actionUse = new ActionUse<>(builder.stepFactory.get(step), actionDef, null);
+        builder.stepFactory.get(step).actions.add(actionUse);
         return new FunctionBuilder(name, actionUse);
     }
 
@@ -45,7 +47,7 @@ public class TransitionBuilder<K, V, R, T, C> {
 
         FunctionBuilder(R action, ActionUse<K, V, R, T, C> actionUse) {
             this.actionUse = actionUse;
-            builder.actions.get(action);
+            builder.actionDefFactory.get(action);
             this.action = action;
         }
 
@@ -67,7 +69,7 @@ public class TransitionBuilder<K, V, R, T, C> {
         public class ResultBuilder {
             private final R result;
 
-            public ResultBuilder(R result) {
+            ResultBuilder(R result) {
                 this.result = result;
             }
 

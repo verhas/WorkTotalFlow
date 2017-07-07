@@ -9,7 +9,7 @@
             <question>What is CVW?</question>
             <answer>
                 <p>
-CVW is a workflow engine that can be embedded into Java applications. It aims
+CVW is primary workflow engine that can be embedded into Java applications. It aims
 to be the simplest workflow engine with very clean interface and easy to
 embed and extend.
                 </p>
@@ -23,7 +23,7 @@ package name of the interfaces.
             </answer>
         </faq>
         <faq id="parameters">
-            <question>How can I pass an object from the framework to a function</question>
+            <question>How can I pass an object from the framework to primary function</question>
             <answer>
 
             </answer>

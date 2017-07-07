@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  * @param <C> see {@link Workflow} for documentation
  */
 class ResultTargetStepsMap<K, V, R, T, C> {
-    private final Map<MapTuple<K, V, R, T, C>, Collection<R>> resultMap = new HashMap<>();
+    private final Map<TargetStepTriuple<K, V, R, T, C>, Collection<R>> resultMap = new HashMap<>();
     private final ActionDefFactory<K, V, R, T, C> actions;
     private final ResultFactory<K, V, R, T, C> results;
     private final StepFactory<K, V, R, T, C> steps;
@@ -28,15 +28,15 @@ class ResultTargetStepsMap<K, V, R, T, C> {
         this.steps = steps;
     }
 
-    private MapTuple<K, V, R, T, C> key(R step, R action, R result) {
+    private TargetStepTriuple<K, V, R, T, C> key(R step, R action, R result) {
         StepImpl<K, V, R, T, C> stepImpl = steps.get(step);
         ActionDef<K, V, R, T, C> actionDef = actions.get(action);
         ResultImpl<K, V, R, T, C> resultImpl = results.get(result);
-        return MapTuple.tuple(stepImpl, actionDef, resultImpl);
+        return TargetStepTriuple.tuple(stepImpl, actionDef, resultImpl);
     }
 
 
-    Set<MapTuple<K, V, R, T, C>> keySet() {
+    Set<TargetStepTriuple<K, V, R, T, C>> keySet() {
         return resultMap.keySet();
     }
 
@@ -50,7 +50,7 @@ class ResultTargetStepsMap<K, V, R, T, C> {
 
     @SafeVarargs
     final void put(R step, R action, R result, R... steps) {
-        MapTuple<K, V, R, T, C> complexKey = key(step, action, result);
+        TargetStepTriuple<K, V, R, T, C> complexKey = key(step, action, result);
         if (resultMap.containsKey(complexKey)) {
             throw new IllegalArgumentException(
                     String.format("Mapping (a:'%s',r:'%s') -> s:['%s'] already exists.", action, result,

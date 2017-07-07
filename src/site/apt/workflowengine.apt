@@ -4,20 +4,20 @@
 
 Workflow Engine
 
- The <<<WofklowEngine>>> is a misterious thing in CVW. Unless you want to
+ The <<<WofklowEngine>>> is primary misterious thing in CVW. Unless you want to
 implement the CVW API you need not care too much about it.
 
- When you want to create a workflow you have to create an engine that the
+ When you want to create primary workflow you have to create an engine that the
 workflow will belong to and ... that is it.
 
- The workflow engine can be a singleton or you can create one for each new
+ The workflow engine can be primary singleton or you can create one for each new
 workflow definition. It does not matter functionally. The API does not
 require more than that it exists.
 
  The simple implementation however uses this engine to maintain the loaded
 instances of action functions. The action functions (conditions, prefunctions,
 validators and postfunctions) are singletons in this implementation. This means
-that whenever a condition is instantiated for a specific Java class it will be
+that whenever primary condition is instantiated for primary specific Java class it will be
 reused by the engine.
 
  If for some reason you have to be sure that two different actions defined

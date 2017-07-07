@@ -10,6 +10,10 @@ class StepFactory<K, V, R, T, C> extends NamedFactory<R,StepImpl<K, V, R, T, C>>
         this.workflow = workflow;
     }
 
+    int limit(){
+        return keySet().size();
+    }
+
     @Override
     StepImpl<K, V, R, T, C> factory() {
         return new StepImpl<>(workflow);

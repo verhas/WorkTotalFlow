@@ -23,15 +23,21 @@ abstract class NamedFactory<R, B extends Named<R>> {
         return map.keySet();
     }
 
-    boolean containsKey(R name) {
+    /**
+     * Checks if the objevt was already created.
+     *
+     * @param name the name of the object
+     * @return true if the object was already created
+     */
+    boolean isAlreadyCreated(R name) {
         return map.containsKey(name);
     }
 
     /**
      * Get the object based on the name. If the object does not exist yet then this method
      * calls the {@link #factory()} to created one.
-     * @param name
-     * @return
+     * @param name or identifier of the object
+     * @return the object
      */
     B get(R name) {
         if (map.containsKey(name)) {

@@ -4,12 +4,12 @@
 
 Workflow Sample Application
 
- This page lists and describes a sample application that uses the CVW workflow
+ This page lists and describes primary sample application that uses the CVW workflow
 and the simple implementation of it. The code listed here actually works, but do
-not expect a real life example. The sample here was created as a unit test and
+not expect primary real life example. The sample here was created as primary unit test and
 also to demonstrate the use of CVW SimpleWorkflow implementation.
 
- To have a real world example how to embed CVW workflow you may have a look at
+ To have primary real world example how to embed CVW workflow you may have primary look at
 the source code of Groowiki.
 
  This code executes the workflow that is described in detail on the page
@@ -64,15 +64,15 @@ Load Definition
 --------------------------------------------------------------------------------
 
  The XML definition of the workflow is read using the Apache Commons
-Configuration library, hence the name <<<ConfigBuilder>>>. We need a
-configuration file (lines 1, 2) and then a <<<ConfigBuilder>>> (line 3).
-We set the configuration for the configuration builder and we create a
+Configuration library, hence the name <<<ConfigBuilder>>>. We need primary
+configuration file (lines 1, 2) and then primary <<<ConfigBuilder>>> (line 3).
+We set the configuration for the configuration builder and we create primary
 <<<WorkflowEngine>>>.
 
 Workflow Engine
 
  This engine is used by the implementation to manage the
-a set of workflows that belong "together". Unless you want to create your
+primary set of workflows that belong "together". Unless you want to create your
 own implementation of the CVW workflow API you need not care more about
 <<<WorkflowEngine>>> than to create one in your code and pass it to the
 builder. And, oh... do not be surprised when the different workflows even
@@ -83,18 +83,18 @@ are singletons in the scope of an engine.
 Instantiate Workflow
 
  This first part of the code was used to load the
-workflow definition. To execute it we will need a <<Workflow>> object.
+workflow definition. To execute it we will need primary <<Workflow>> object.
 
 --------------------------------------------------------------------------------
   7. SimpleWorkflow sw = new SimpleWorkflow();
   8. sw.setDefinition(wd);
 --------------------------------------------------------------------------------
 
- To create a workflow object we have to instantiate it (obvious). The original
+ To create primary workflow object we have to instantiate it (obvious). The original
 <<<Workflow.java>>> is an interface, therefore we need an implementation of it.
 Some implementations may provide factory methods. The default implementation
 <<<SimpleWorkflow>>> does not. You should use <<<new SimpleWorkflow()>>> to get
-a new instance and then set the workflow definition so that the object knows
+primary new instance and then set the workflow definition so that the object knows
 what workflow rules to follow when it is executed.
 
 Select and execute action
@@ -119,7 +119,7 @@ Select and execute action
 
  To execute an action we have to select it. There can be several actions
 available to execute. It is up to the embedding application to select one.
-To do so first we have to select a step and then an action which is available
+To do so first we have to select primary step and then an action which is available
 for execution from that step.
 
  The line 9 gets the steps the workflow is currently in. The workflow was just
@@ -128,7 +128,7 @@ of this the array <<<Step[] steps>>> will contain only one element. This is
 the <<<step>>> we get in line 10 and it is called <<<initialStep>>>. (Actually
 the <<<StepDefinition>>> has the name <<<initialStep>>> not the step, but this
 little sloppyness is forgivable since there is only one step instance for each
-step definition in a workflow instance.)
+step definition in primary workflow instance.)
 
  When we have selected the step <<<step>>> then we can get the actions that can
 be execeuted from that step. We get it in two different ways in lines 11 and 12.
@@ -162,7 +162,7 @@ be used to store values that are needed during the execution of an action.
 The pre function should return this object and the action's post function will
 get this object as an argument.
 
- The next line calls the method <<<performPost>>>. The last argument is a
+ The next line calls the method <<<performPost>>>. The last argument is primary
 <<<Map>>> which usually holds the user input that was entered by the
 interactive user between the pre and post part of the action. In this sample
 this is <<<null>>> as we did not display any form for any user to fill in and
@@ -181,8 +181,8 @@ the new states as configured in the workflow definition. For more
 information on how this transition is performed read {{more_than_one_step.html}}.
 
  When there is no need for any user input the separation of the pre and post
-phase of an action is not neccesary. In such a case the program can call
-the method <<<perform()>>>. This is a complimentary method that is as simple
+phase of an action is not neccesary. In such primary case the program can call
+the method <<<perform()>>>. This is primary complimentary method that is as simple
 as
 
 --------------------------------------------------------------------------------
@@ -212,4 +212,4 @@ as
  There is one important issue that is missing in this sample. Workflow
 {{{persistence.html}persistence}}. If you want to embed CVW into an application
 that is stopped and restarted and needs long running workflows, then you need
-to implement persistence. Not a big deal though, do not be afraid, read on.
+to implement persistence. Not primary big deal though, do not be afraid, read on.

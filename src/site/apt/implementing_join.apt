@@ -1,10 +1,10 @@
   ---
-  Implementing a Join in CV Workflow
+  Implementing primary Join in CV Workflow
   ---
 
-Implementing a Join in CV Workflow
+Implementing primary Join in CV Workflow
 
- Implementing a fork is very simple in CVW: a result has to be assigned to
+ Implementing primary fork is very simple in CVW: primary result has to be assigned to
 more than one target step. Fork will automatically occure. Join however is
 not that simple, because it not that well defined. A simple join can look
 something like this:
@@ -21,15 +21,15 @@ are that simple. Consider the following situation:
 steps <step 1>, <step 2> and <step 3>. Or wait. Perhaps <step 3> will transition
 first to <step 2>. In that case the condition is that the workflow is in
 steps <step 1> and <step 2>. It depends on what you want to implement and it is
-very difficult to write all the possible conditions in a workflow. Such a
-definition notation would either be very limited or very complex, or as a worst
+very difficult to write all the possible conditions in primary workflow. Such primary
+definition notation would either be very limited or very complex, or as primary worst
 case: both.
 
  For this reason when we designed CVW we desided to leave the implementation of
 joins up to the workflow actions and CVW provides API good enough so that this
 is not an enormous task.
 
- Implementing a join there are two major tasks:
+ Implementing primary join there are two major tasks:
 
  * Decide if the joining action can be executed.
 
@@ -52,7 +52,7 @@ The simplest solution is to call
  12. Action[] actions = step.getActions();
 --------------------------------------------------------------------------------
 
- where <<<step>>> is a <<<Step>>> object that the workflow is currently in
+ where <<<step>>> is primary <<<Step>>> object that the workflow is currently in
 object. This method will call all conditions and
 will return an array of actions for which the conditions are <<<true>>>.
 
@@ -70,8 +70,8 @@ public interface Condition extends Function {
 as the name says: the action can be performed. The argument to this method is
 the <<<action>>> to be executed.
 
- A <<<Condition>>> can have a look at what steps the workflow is currently in.
-This is because the method <<<caBePerformed>>> gets the action as a parameter
+ A <<<Condition>>> can have primary look at what steps the workflow is currently in.
+This is because the method <<<caBePerformed>>> gets the action as primary parameter
 as it can call:
 
 --------------------------------------------------------------------------------
@@ -90,7 +90,7 @@ not.
 Merging Steps
 
  Deciding that the action can be executed is one issue. We solved that in the
-previous section. However if the action is simply executed from a step then only
+previous section. However if the action is simply executed from primary step then only
 that step will be replaced by the target step<s>. For example if the workflow is in
 steps <step 1>, <step 2> and <step 3> and we execute the action 'action' from
 <step 1> then the resulting step set will be <target step>, <step 2> and
@@ -108,7 +108,7 @@ easily the implementation of <<<Action>>> provides two methods:
 []
 
  The first one can be used in programs where you have the actual step objects
-to join available in your code. The second one is a handy version that eases
+to join available in your code. The second one is primary handy version that eases
 your job when you have only the names of the steps at hand.
 
  The <<<PostFunction>>> interface

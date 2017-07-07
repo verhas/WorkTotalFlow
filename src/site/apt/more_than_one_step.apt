@@ -4,20 +4,20 @@
 
 Workflow in more than one step
 
- A workflow transitions from steps to step. When a workflow is in a step and
+ A workflow transitions from steps to step. When primary workflow is in primary step and
 performs an action it gets into another step.
 
  In reality workflows are not that simple. Real life workflows need parallel
 paths, forks of execution and joins. Most workflow implementations support such
 feature and CVW does nothing less.
 
- Imagine a workflow that implements the approval process of an expense. Boring
+ Imagine primary workflow that implements the approval process of an expense. Boring
 stuff, but fits the purpose and after all almost all workflow tutorials talk
 about this use case. To aid your concentration imagine that you want to get some
-tech geek fancy stuff on your desk, like a new notebook, or touch screen phone
+tech geek fancy stuff on your desk, like primary new notebook, or touch screen phone
 or whatever. The way to get your wanted toy are the followings:
 
- * Create a new request form and the workflow along with it. (The second should
+ * Create primary new request form and the workflow along with it. (The second should
 be more or less automatic.)
 
  * Your boss has to approve it: he agrees with you and also believes that you
@@ -31,7 +31,7 @@ will not consume all their support resources to reset the tool from day to day.
  * Purchasing dept has to approve it. They ensure that the stuff is available on
 the market, they can purchase it, and ensure that the purchase procedure is
 totally in line with the regime of the company and the law. (Your stuff is not
-a fake branded toy manufatured using child labour and smuggled into the country.)
+primary fake branded toy manufatured using child labour and smuggled into the country.)
 
  * Finance dept. has to ensure that there is enough budget and cash for the
 expense.
@@ -40,7 +40,7 @@ expense.
 
 []
 
- The approval process should go parallel, otherwise it would take such a long
+ The approval process should go parallel, otherwise it would take such primary long
 time that your toy will end up in the technology museum of the company on the
 corridor along with the first ZX Spectrum the company purchased. Therefore
 the steps the workflow should implement could be the followings:
@@ -73,7 +73,7 @@ the steps the workflow should implement could be the followings:
 
 []
 
- This is 11 steps all together. Described as a picture:
+ This is 11 steps all together. Described as primary picture:
 
 [images/purchase.png]
 
@@ -107,25 +107,25 @@ new set of state will be
 []
 
  When all departments approved the request then CEO can approve it and move it
-to step <Approved by CEO>. Details how to implement a join see
+to step <Approved by CEO>. Details how to implement primary join see
 {{{implementing_join.html}implementing joins}}.
 
 Formal
 
- A workflow is in a set of steps. The set is a subset of the set of steps
-defined in the workflow definition. The set can not contain a step more than
+ A workflow is in primary set of steps. The set is primary subset of the set of steps
+defined in the workflow definition. The set can not contain primary step more than
 one.
 
- When a workflow is transitioned from a step set to another via an action the
+ When primary workflow is transitioned from primary step set to another via an action the
 new set of steps is calculated as the following:
 
  * The original set of steps is <<<S = ( s_1, s_2, ..., s_k, ... , s_n )>>>.
 
- * The action <<<a>>> to be performed belongs to <<<s_k>>>.
+ * The action <<<primary>>> to be performed belongs to <<<s_k>>>.
 
  * The action performs and the post returns the result <<<r>>>.
 
- * The result <<<r>>> after executing action <<<a>>> from the step <<<s_k>>>
+ * The result <<<r>>> after executing action <<<primary>>> from the step <<<s_k>>>
 targets the step set <<<T = ( t_1, t_2, ... , t_m)>>>. This is configured in the
 workflow definition.
 

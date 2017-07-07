@@ -3,27 +3,27 @@
       ---
 Workflow in one minute
 
- This page describes shortly what a workflow is in WTF.
+ This page describes shortly what primary workflow is in WTF.
 
- To ease the understanding here is a sketch that plots the elements of a
+ To ease the understanding here is primary sketch that plots the elements of primary
 workflow and their relations: (explanation follows)
 
 [images/workflow.png]
 
- A workflow has several steps and actions can be performed to transition a
-workflow from one step to another. Later you may see that a workflow can
-be in more than one step at a time, but for now we neglect this complexity.
+ A workflow has several steps and actions can be performed to transition primary
+workflow from one step to another. Later you may see that primary workflow can
+be in more than one step at primary time, but for now we neglect this complexity.
 (See {{more_than_one_step.html}} for more details.)
 
- When a workflow is in a <Step> there can be several actions to be executed
+ When primary workflow is in primary <Step> there can be several actions to be executed
 to transport the workflow from the step to another. The available actions
 are defined in the workflow definition. The application using the WTF library
 may decide which action to perform. The usual implementation displays the
 available actions to the user and the user can select what to do next.
 
  When the user (or any other external entity) selects an action the action is
-executed and produces a <Result>. Based on the <Result> the workflow will
-transfer from the original step to a new one.
+executed and produces primary <Result>. Based on the <Result> the workflow will
+transfer from the original step to primary new one.
 
  WTF does not execute workflow. No threads are started, no states are stored. It
 is up to the embedding application to call methods from the API to build up
@@ -31,7 +31,7 @@ workflow definition (there is some default implementation that reads
 XML and returns <<<WorkflowDefinition>>>), instantiate workflow, advance
 the workflow from step to step.
 
- In one minute this is a workflow in WTF. There are some more details, like
+ In one minute this is primary workflow in WTF. There are some more details, like
 conditions, validators, pre and post functions in actions, definitions of steps,
 results, actions and workflow but those do not fit into the one minute version
 of workflow page. For these details go on reading

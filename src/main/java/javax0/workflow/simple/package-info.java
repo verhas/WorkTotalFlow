@@ -1,4 +1,4 @@
 /**
- * This package isIn the simple workflow implementation.
+ * This package is the simple workflow implementation.
  */
 package javax0.workflow.simple;
