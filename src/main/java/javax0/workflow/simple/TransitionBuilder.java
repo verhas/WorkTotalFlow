@@ -1,5 +1,6 @@
 package javax0.workflow.simple;
 
+import javax0.workflow.Parameters;
 import javax0.workflow.Result;
 
 import java.util.Arrays;
@@ -9,7 +10,7 @@ public class TransitionBuilder<K, V, R, T, C> {
     private final WorkflowBuilder<K, V, R, T, C> builder;
     private final R step;
 
-    public TransitionBuilder(WorkflowBuilder<K, V, R, T, C> builder, R name) {
+    TransitionBuilder(WorkflowBuilder<K, V, R, T, C> builder, R name) {
         this.builder = builder;
         this.step = name;
     }
@@ -19,10 +20,13 @@ public class TransitionBuilder<K, V, R, T, C> {
         if (builder.defaultName == null) {
             throw new IllegalArgumentException("Can not use 'to(steps)' when there is no default name");
         }
-        ActionDef<K, V, R, T, C> actionDef = builder.actions.get(builder.defaultName);
-        Result<K, V, R, T, C> autoResult = new ResultImpl<>();
+        final ActionDef<K, V, R, T, C> actionDef = builder.actions.get(builder.defaultName);
+        final Parameters<K, V> defaultActionDefParameters = null;
+        final Result<K, V, R, T, C> autoResult = new ResultImpl<>();
+
         autoResult.getSteps().addAll(Arrays.stream(steps).map(builder.steps::get).collect(Collectors.toSet()));
-        ActionUse<K, V, R, T, C> actionUse = new ActionUse<>(builder.steps.get(step), actionDef, autoResult);
+
+        final ActionUse<K, V, R, T, C> actionUse = new ActionUse<>(builder.steps.get(step), actionDef, defaultActionDefParameters, autoResult);
         builder.steps.get(step).actions.add(actionUse);
         builder.resultMapping.put(step, builder.defaultName, builder.defaultName, steps);
         return TransitionBuilder.this;
@@ -30,15 +34,17 @@ public class TransitionBuilder<K, V, R, T, C> {
 
     public FunctionBuilder action(R name) {
         ActionDef<K, V, R, T, C> actionDef = builder.actions.get(name);
-        ActionUse<K, V, R, T, C> actionUse = new ActionUse<>(builder.steps.get(step), actionDef);
+        ActionUse<K, V, R, T, C> actionUse = new ActionUse<>(builder.steps.get(step), actionDef, null);
         builder.steps.get(step).actions.add(actionUse);
-        return new FunctionBuilder(name);
+        return new FunctionBuilder(name, actionUse);
     }
 
-    public class FunctionBuilder {
+    public class FunctionBuilder extends ParametersBuilder<FunctionBuilder, K, V> {
         private final R action;
+        private final ActionUse<K, V, R, T, C> actionUse;
 
-        public FunctionBuilder(R action) {
+        FunctionBuilder(R action, ActionUse<K, V, R, T, C> actionUse) {
+            this.actionUse = actionUse;
             builder.actions.get(action);
             this.action = action;
         }
@@ -49,10 +55,12 @@ public class TransitionBuilder<K, V, R, T, C> {
                 throw new IllegalArgumentException("Can not use 'to(workflow)' when there is no default result");
             }
             builder.resultMapping.put(step, action, builder.defaultName, steps);
+            actionUse.setParameters(parameters::get);
             return TransitionBuilder.this;
         }
 
         public ResultBuilder when(R name) {
+            actionUse.setParameters(parameters::get);
             return new ResultBuilder(name);
         }
 

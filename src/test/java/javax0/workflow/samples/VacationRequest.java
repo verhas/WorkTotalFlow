@@ -77,7 +77,7 @@ public class VacationRequest {
          */
         wb.from("start").action("submit").to("RM approval pending", "PM approval pending")
                 .action("withdraw").to("withdrawn");
-        wb.from("PM approval pending").action("approve").when("OK").then("final auto approve pending")
+        wb.from("PM approval pending").action("approve").parameter("z","x").when("OK").then("final auto approve pending")
                 .when("reject").then("rejected");
         wb.from("RM approval pending").action("approve").when("OK").then("final auto approve pending")
                 .when("reject").then("rejected");

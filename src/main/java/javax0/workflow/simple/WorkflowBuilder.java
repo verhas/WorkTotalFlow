@@ -13,11 +13,11 @@ public class WorkflowBuilder<K, V, R, T, C> {
     private final ResultSupplier<K, V, R, T, C> resultSupplier = new ResultSupplier<>();
     private final Workflow<K, V, R, T, C> workflow =
             new WorkflowImpl<>(resultSupplier::supplier);
-    private final Results<K, V, R, T, C> results = new Results<>();
+    private final ResultFactory<K, V, R, T, C> results = new ResultFactory<>();
     R defaultName;
-    ActionDefs<K, V, R, T, C> actions = new ActionDefs<>();
-    Steps<K, V, R, T, C> steps = new Steps<>(workflow);
-    ResultMap<K, V, R, T, C> resultMapping = new ResultMap<>(actions, results, steps);
+    ActionDefFactory<K, V, R, T, C> actions = new ActionDefFactory<>();
+    StepFactory<K, V, R, T, C> steps = new StepFactory<>(workflow);
+    ResultTargetStepsMap<K, V, R, T, C> resultMapping = new ResultTargetStepsMap<>(actions, results, steps);
     private Map<R, ActionDefBuilder<K, V, R, T, C>> pendingActionBuilders = new HashMap<>();
 
     public WorkflowBuilder(R defaultName) {

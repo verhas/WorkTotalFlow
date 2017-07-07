@@ -12,19 +12,26 @@ public class ActionUse<K, V, R, T, C> implements Action<K, V, R, T, C> {
     private final Step<K, V, R, T, C> step;
     private final boolean auto;
     private Result<K, V, R, T, C> autoResult;
+    private Map<K, V> parameters;
+    private Parameters<K, V> merged;
 
     public ActionUse(Step<K, V, R, T, C> step, ActionDef<K, V, R, T, C> actionDef) {
-        this(step, actionDef, false);
+        this(step, actionDef, null, false);
     }
 
-    public ActionUse(Step<K, V, R, T, C> step, ActionDef<K, V, R, T, C> actionDef, Result<K, V, R, T, C> autoResult) {
-        this(step, actionDef, true);
+    public ActionUse(Step<K, V, R, T, C> step, ActionDef<K, V, R, T, C> actionDef, Parameters<K, V> parameters) {
+        this(step, actionDef, parameters, false);
+    }
+
+    public ActionUse(Step<K, V, R, T, C> step, ActionDef<K, V, R, T, C> actionDef, Parameters<K, V> parameters, Result<K, V, R, T, C> autoResult) {
+        this(step, actionDef, parameters, true);
         this.autoResult = autoResult;
     }
 
-    private ActionUse(Step<K, V, R, T, C> step, ActionDef<K, V, R, T, C> actionDef, boolean auto) {
+    private ActionUse(Step<K, V, R, T, C> step, ActionDef<K, V, R, T, C> actionDef, Parameters<K, V> parameters, boolean auto) {
         this.step = step;
         this.actionDef = actionDef;
+        this.merged = new MergedParameters<>(parameters, actionDef.parameters);
         this.auto = auto;
     }
 
@@ -47,13 +54,17 @@ public class ActionUse<K, V, R, T, C> implements Action<K, V, R, T, C> {
      * Get the parameters from the action definition as well as from the action
      * declaration, and merge the two and return the result. In case key
      * has value in both of the parameters then the one specified for the actual Action
-     * is ruling overwriting the one in the ActionDefinition.
+     * is ruling overwriting the one in the ActionDef.
      *
      * @return the merged parameters
      */
     @Override
     public Parameters<K, V> getParameters() {
-        return actionDef.parameters;
+        return merged;
+    }
+
+    public void setParameters(Parameters<K, V> parameters) {
+        merged = new MergedParameters<>(parameters, actionDef.parameters);
     }
 
     @Override
@@ -102,7 +113,7 @@ public class ActionUse<K, V, R, T, C> implements Action<K, V, R, T, C> {
     }
 
     private Stream<Action<K, V, R, T, C>> actionsStream() {
-        final Optional<Step<K,V,R,T,C>> step;
+        final Optional<Step<K, V, R, T, C>> step;
         return (step = getStep().getWorkflow().getSteps().stream().findAny()).isPresent() ?
                 step.get().getActions() : Stream.empty();
     }

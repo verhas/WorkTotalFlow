@@ -7,12 +7,18 @@ import java.util.HashSet;
 import java.util.function.Supplier;
 
 /**
- * @author verhas
+ *
+ * @param <K> see {@link Workflow} for documentation
+ * @param <V> see {@link Workflow} for documentation
+ * @param <R> see {@link Workflow} for documentation
+ * @param <T> see {@link Workflow} for documentation
+ * @param <C> see {@link Workflow} for documentation
  */
 public interface Action<K, V, R, T, C> extends Named<R> {
 
     /**
-     * When an action is automatic it is executed immediately without waiting from external trigger.
+     * When an action is automatic it is executed immediately without waiting from external trigger. Note that this
+     * feature is experimental.
      *
      * @return true if the action is automatic
      */
