@@ -17,9 +17,9 @@ public class VacationRequest {
 
     @Test
     public void sampleVacationRequestWorkflow() throws ValidatorFailed {
-        Workflow<String, String, String, Object, Object> workflow = createWorkflow();
+        Workflow<String, String, Object, String, Object, Object> workflow = createWorkflow();
 
-        WorkflowWrapper<String, String, String, Object, Object> wf = new WorkflowWrapper<>(workflow);
+        WorkflowWrapper<String, String, Object, String, Object, Object> wf = new WorkflowWrapper<>(workflow);
         wf.setLogger(System.out::println);
 
         while (wf.notOnlyIn("approved")) {
@@ -43,12 +43,12 @@ public class VacationRequest {
 
     @Test
     public void sampleVacationRequestWorkflowExecutorUsed() throws ValidatorFailed {
-        Workflow<String, String, String, Object, Object> workflow = createWorkflow();
+        Workflow<String, String, Object, String, Object, Object> workflow = createWorkflow();
 
-        WorkflowWrapper<String, String, String, Object, Object> wf = new WorkflowWrapper<>(workflow);
+        WorkflowWrapper<String, String, Object, String, Object, Object> wf = new WorkflowWrapper<>(workflow);
         wf.setLogger(System.out::println);
 
-        Executor<String, String, String, Object, Object> executor = new Executor<>(wf,
+        Executor<String, String, Object, String, Object, Object> executor = new Executor<>(wf,
                 m -> {
                     if (m.containsKey("start")) return entry("start", "submit");
                     if (m.containsKey("RM approval pending")) return entry("RM approval pending", "approve");
@@ -64,8 +64,8 @@ public class VacationRequest {
         }
     }
 
-    private Workflow<String, String, String, Object, Object> createWorkflow() {
-        WorkflowBuilder<String, String, String, Object, Object> wb = new WorkflowBuilder<>("OK");
+    private Workflow<String, String, Object, String, Object, Object> createWorkflow() {
+        WorkflowBuilder<String, String, Object, String, Object, Object> wb = new WorkflowBuilder<>("OK");
         /* TODO create a builder that converts a string of the following form to builder calls
         start -> submit -> RM approval pending, PM approval pending
               -> withdraw -> withdrawn
@@ -91,9 +91,9 @@ public class VacationRequest {
                 .preFunction((action) -> null)
                 .condition((action) -> true)
                 .postFunction((action, t, user) -> {
-                    Step<String, String, String, Object, Object> step = action.getStep();
-                    Workflow<String, String, String, Object, Object> workflow = step.getWorkflow();
-                    Supplier<Result<String, String, String, Object, Object>> supplier = workflow.result(action, "OK");
+                    Step<String, String, Object, String, Object, Object> step = action.getStep();
+                    Workflow<String, String, Object, String, Object, Object> workflow = step.getWorkflow();
+                    Supplier<Result<String, String, Object, String, Object, Object>> supplier = workflow.result(action, "OK");
                     return supplier.get();
                 })
                 .validator((action, t, user) -> true)

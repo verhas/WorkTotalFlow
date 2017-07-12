@@ -20,12 +20,12 @@ import java.util.function.Predicate;
  * object, it only passes it on to the post function.
  * </li>
  * <li>
- * The validator {@link Validator#test(Action, Object, Parameters)} is executed before the post function. If there is
+ * The validator {@link Validator#test(Action, Object, Object)} is executed before the post function. If there is
  * any invalidity in the parameters, the current action and the transient object the pre function returned then the
  * validator has to return false and in that case the action will not be performed.
  * </li>
  * <li>
- * The post functoin {@link Post#apply(Action, Object, Parameters)} is executed to make the transition from the
+ * The post functoin {@link Post#apply(Action, Object, Object)} is executed to make the transition from the
  * step that the action was starting from to the step or steps the post function result suggests. At the same time
  * if there is any database, back-end or any other action that has to be performed then the post function is the place
  * for that. If any of these back-end functionalities can not be performed then the post function should return a
@@ -42,12 +42,13 @@ public interface Functions {
      *
      * @param <K> see {@link Workflow} for documentation
      * @param <V> see {@link Workflow} for documentation
+     * @param <I> see {@link Workflow} for documentation
      * @param <R> see {@link Workflow} for documentation
      * @param <T> see {@link Workflow} for documentation
      * @param <C> see {@link Workflow} for documentation
      */
     @FunctionalInterface
-    interface Post<K, V, R, T, C> {
+    interface Post<K, V, I, R, T, C> {
 
         /**
          * Execute the post function.
@@ -58,8 +59,8 @@ public interface Functions {
          * @param userInput       the user input
          * @return the result of the action
          */
-        Result<K, V, R, T, C> apply(Action<K, V, R, T, C> action, T transientObject,
-                                    Parameters<K, V> userInput);
+        Result<K, V, I, R, T, C> apply(Action<K, V, I, R, T, C> action, T transientObject,
+                                       I userInput);
     }
 
     /**
@@ -79,12 +80,13 @@ public interface Functions {
      *
      * @param <K> see {@link Workflow} for documentation
      * @param <V> see {@link Workflow} for documentation
+     * @param <I> see {@link Workflow} for documentation
      * @param <R> see {@link Workflow} for documentation
      * @param <T> see {@link Workflow} for documentation
      * @param <C> see {@link Workflow} for documentation
      */
     @FunctionalInterface
-    interface Pre<K, V, R, T, C> extends Function<Action<K, V, R, T, C>, T> {
+    interface Pre<K, V, I, R, T, C> extends Function<Action<K, V, I, R, T, C>, T> {
 
     }
 
@@ -99,12 +101,13 @@ public interface Functions {
      *
      * @param <K> see {@link Workflow} for documentation
      * @param <V> see {@link Workflow} for documentation
+     * @param <I> see {@link Workflow} for documentation
      * @param <R> see {@link Workflow} for documentation
      * @param <T> see {@link Workflow} for documentation
      * @param <C> see {@link Workflow} for documentation
      */
     @FunctionalInterface
-    interface Validator<K, V, R, T, C> {
+    interface Validator<K, V, I, R, T, C> {
 
         /**
          * Decides whether the user input is valid for the action.
@@ -115,8 +118,8 @@ public interface Functions {
          * @return true if the user input is acceptable and false if it is erroneous
          */
         @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-        boolean test(Action<K, V, R, T, C> action, T transientObject,
-                     Parameters<K, V> userInput);
+        boolean test(Action<K, V, I, R, T, C> action, T transientObject,
+                     I userInput);
     }
 
     /**
@@ -142,12 +145,13 @@ public interface Functions {
      *
      * @param <K> see {@link Workflow} for documentation
      * @param <V> see {@link Workflow} for documentation
+     * @param <I> see {@link Workflow} for documentation
      * @param <R> see {@link Workflow} for documentation
      * @param <T> see {@link Workflow} for documentation
      * @param <C> see {@link Workflow} for documentation
      */
     @FunctionalInterface
-    interface Condition<K, V, R, T, C> extends Predicate<Action<K, V, R, T, C>> {
+    interface Condition<K, V, I, R, T, C> extends Predicate<Action<K, V, I, R, T, C>> {
 
     }
 }

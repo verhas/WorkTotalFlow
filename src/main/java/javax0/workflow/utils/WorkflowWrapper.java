@@ -9,15 +9,15 @@ import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class WorkflowWrapper<K, V, R, T, C> {
-    final Workflow<K, V, R, T, C> workflow;
+public class WorkflowWrapper<K, V, I, R, T, C> {
+    final Workflow<K, V, I, R, T, C> workflow;
     Consumer<String> logger = (s) -> {
     };
     private R lastQueriedStepId = null;
-    private Step<K, V, R, T, C> lastQueriedStep = null;
+    private Step<K, V, I, R, T, C> lastQueriedStep = null;
     private R getLastQueriedActionId = null;
 
-    public WorkflowWrapper(Workflow<K, V, R, T, C> workflow) {
+    public WorkflowWrapper(Workflow<K, V, I, R, T, C> workflow) {
         this.workflow = workflow;
     }
 
@@ -32,7 +32,7 @@ public class WorkflowWrapper<K, V, R, T, C> {
      * @param <C>      type parameter for the workflow.
      * @return the name collection of the steps.
      */
-    public static <K, V, R, T, C> Collection<R> stepsOf(Workflow<K, V, R, T, C> workflow) {
+    public static <K, V, I, R, T, C> Collection<R> stepsOf(Workflow<K, V, I, R, T, C> workflow) {
         return workflow.getSteps().stream().map(Step::getName).collect(Collectors.toSet());
     }
 
@@ -47,7 +47,7 @@ public class WorkflowWrapper<K, V, R, T, C> {
      * @param <C>  type parameter for the workflow.
      * @return the name collection of the actions.
      */
-    public static <K, V, R, T, C> Collection<R> actionsOf(Step<K, V, R, T, C> step) {
+    public static <K, V, I, R, T, C> Collection<R> actionsOf(Step<K, V, I, R, T, C> step) {
         return step.getActions().map(Action::getName).collect(Collectors.toSet());
     }
 
@@ -60,7 +60,7 @@ public class WorkflowWrapper<K, V, R, T, C> {
      * @param step from which the execution of the action can start
      * @return the executor to be used in the fluent call
      */
-    public Executor from(Step<K, V, R, T, C> step) {
+    public Executor from(Step<K, V, I, R, T, C> step) {
         return new Executor(step);
     }
 
@@ -70,7 +70,7 @@ public class WorkflowWrapper<K, V, R, T, C> {
      * This functionality will be depreated in later releases and System.getLogger will be used for Java 9.
      * </p>
      *
-     * @param logger
+     * @param logger the logger to set
      */
     public void setLogger(Consumer<String> logger) {
         this.logger = logger;
@@ -156,7 +156,7 @@ public class WorkflowWrapper<K, V, R, T, C> {
         return lastQueriedStep.getActions(a -> a.getName().equals(action)).findAny().isPresent();
     }
 
-    public Action<K, V, R, T, C> action() {
+    public Action<K, V, I, R, T, C> action() {
         return lastQueriedStep.getActions(a -> a.getName().equals(getLastQueriedActionId)).findAny().orElse(null);
     }
 
@@ -194,7 +194,7 @@ public class WorkflowWrapper<K, V, R, T, C> {
     /**
      * @return the step that was queries last time.
      */
-    public Step<K, V, R, T, C> step() {
+    public Step<K, V, I, R, T, C> step() {
         return step(lastQueriedStepId);
     }
 
@@ -202,7 +202,7 @@ public class WorkflowWrapper<K, V, R, T, C> {
      * @param id of the step
      * @return the step for the id
      */
-    public Step<K, V, R, T, C> step(R id) {
+    public Step<K, V, I, R, T, C> step(R id) {
         return lastQueriedStep = workflow.getSteps().stream().filter(s -> s.getName().equals(id)).findAny().orElse(null);
     }
 
@@ -229,7 +229,7 @@ public class WorkflowWrapper<K, V, R, T, C> {
      * specify again the id of the action.
      * </p>
      *
-     * @throws ValidatorFailed
+     * @throws ValidatorFailed when the userInput validation fails
      */
     public void execute() throws ValidatorFailed {
         if (lastQueriedStep == null && lastQueriedStepId != null) {
@@ -243,9 +243,9 @@ public class WorkflowWrapper<K, V, R, T, C> {
      * See the documentation of the method {@link #from(Step)}
      */
     public class Executor {
-        private final Step<K, V, R, T, C> step;
+        private final Step<K, V, I, R, T, C> step;
 
-        public Executor(Step<K, V, R, T, C> step) {
+        public Executor(Step<K, V, I, R, T, C> step) {
             this.step = step;
         }
 
@@ -256,7 +256,7 @@ public class WorkflowWrapper<K, V, R, T, C> {
          * @throws ValidatorFailed when the validator defined in the action fails.
          */
         public void execute(R id) throws ValidatorFailed {
-            Action<K, V, R, T, C> action = step.getActions()
+            Action<K, V, I, R, T, C> action = step.getActions()
                     .filter(a -> a.getName().equals(id)).findAny().orElse(null);
             logger.accept(String.format("From step '%s' action '%s' is '%s'", step.getName(), id, action));
             if (action == null) {

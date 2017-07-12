@@ -22,17 +22,18 @@ import javax0.workflow.Workflow;
  *
  * @param <K> see {@link Workflow} for documentation
  * @param <V> see {@link Workflow} for documentation
+ * @param <I> see {@link Workflow} for documentation
  * @param <R> see {@link Workflow} for documentation
  * @param <T> see {@link Workflow} for documentation
  * @param <C> see {@link Workflow} for documentation
  */
-class ActionDef<K, V, R, T, C> extends Named<R> {
+class ActionDef<K, V, I, R, T, C> extends Named<R> {
 
     Parameters<K, V> parameters;
-    Functions.Condition<K, V, R, T, C> condition;
-    Functions.Pre<K, V, R, T, C> pre;
-    Functions.Validator<K, V, R, T, C> validator;
-    Functions.Post<K, V, R, T, C> post;
+    Functions.Condition<K, V, I, R, T, C> condition;
+    Functions.Pre<K, V, I, R, T, C> pre;
+    Functions.Validator<K, V, I, R, T, C> validator;
+    Functions.Post<K, V, I, R, T, C> post;
 
     @Override
     public String toString() {

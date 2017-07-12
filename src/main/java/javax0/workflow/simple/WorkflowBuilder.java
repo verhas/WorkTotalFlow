@@ -8,17 +8,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class WorkflowBuilder<K, V, R, T, C> {
+public class WorkflowBuilder<K, V, I, R, T, C> {
 
-    private final ResultSupplier<K, V, R, T, C> resultSupplier = new ResultSupplier<>();
-    private final WorkflowImpl<K, V, R, T, C> workflow =
+    private final ResultSupplier<K, V, I, R, T, C> resultSupplier = new ResultSupplier<>();
+    private final WorkflowImpl<K, V, I, R, T, C> workflow =
             new WorkflowImpl<>(resultSupplier::supplier);
-    private final ResultFactory<K, V, R, T, C> results = new ResultFactory<>();
+    private final ResultFactory<K, V, I, R, T, C> results = new ResultFactory<>();
     R defaultName;
-    ActionDefFactory<K, V, R, T, C> actionDefFactory = new ActionDefFactory<>();
-    StepFactory<K, V, R, T, C> stepFactory = new StepFactory<>(workflow);
-    ResultTargetStepsMap<K, V, R, T, C> resultMapping = new ResultTargetStepsMap<>(actionDefFactory, results, stepFactory);
-    private Map<R, ActionDefBuilder<K, V, R, T, C>> pendingActionBuilders = new HashMap<>();
+    ActionDefFactory<K, V, I, R, T, C> actionDefFactory = new ActionDefFactory<>();
+    StepFactory<K, V, I, R, T, C> stepFactory = new StepFactory<>(workflow);
+    ResultTargetStepsMap<K, V, I, R, T, C> resultMapping = new ResultTargetStepsMap<>(actionDefFactory, results, stepFactory);
+    private Map<R, ActionDefBuilder<K, V, I, R, T, C>> pendingActionBuilders = new HashMap<>();
 
     public WorkflowBuilder(R defaultName) {
         this.defaultName = defaultName;
@@ -29,7 +29,7 @@ public class WorkflowBuilder<K, V, R, T, C> {
     }
 
     @SafeVarargs
-    public final Workflow<K, V, R, T, C> start(R... startSteps) {
+    public final Workflow<K, V, I, R, T, C> start(R... startSteps) {
         checkActionsAreDefined();
         buildActions();
         createSteps();
@@ -40,10 +40,10 @@ public class WorkflowBuilder<K, V, R, T, C> {
     }
 
     private void prepareResultSupplier() {
-        for (TargetStepTriuple<K, V, R, T, C> key : resultMapping.keySet()) {
-            ActionDef<K, V, R, T, C> action = actionDefFactory.get(key.action.name);
-            Step<K, V, R, T, C> step = stepFactory.get(key.step.name);
-            ResultImpl<K, V, R, T, C> result = new ResultImpl<>();
+        for (TargetStepTriuple<K, V, I, R, T, C> key : resultMapping.keySet()) {
+            ActionDef<K, V, I, R, T, C> action = actionDefFactory.get(key.action.name);
+            Step<K, V, I, R, T, C> step = stepFactory.get(key.step.name);
+            ResultImpl<K, V, I, R, T, C> result = new ResultImpl<>();
             result.getSteps().addAll(
                     resultMapping.get(key.step.name, key.action.name, key.result.name)
                             .stream()
@@ -55,7 +55,7 @@ public class WorkflowBuilder<K, V, R, T, C> {
     }
 
     private void buildActions() {
-        for (final ActionDefBuilder<K, V, R, T, C> builder : pendingActionBuilders.values()) {
+        for (final ActionDefBuilder<K, V, I, R, T, C> builder : pendingActionBuilders.values()) {
             builder.build(actionDefFactory);
         }
     }
@@ -67,7 +67,7 @@ public class WorkflowBuilder<K, V, R, T, C> {
     }
 
     private void checkActionsAreDefined() {
-        for (final ActionDefBuilder<K, V, R, T, C> builder : pendingActionBuilders.values()) {
+        for (final ActionDefBuilder<K, V, I, R, T, C> builder : pendingActionBuilders.values()) {
             if (!actionDefFactory.isAlreadyCreated(builder.name)) {
                 throw new IllegalArgumentException(String.format("Action '%s' defined but not used.", builder.name));
             }
@@ -88,13 +88,13 @@ public class WorkflowBuilder<K, V, R, T, C> {
         pendingActionBuilders = null;
     }
 
-    public TransitionBuilder<K, V, R, T, C> from(R name) {
+    public TransitionBuilder<K, V, I, R, T, C> from(R name) {
         stepFactory.get(name);
         return new TransitionBuilder<>(this, name);
     }
 
-    public ActionDefBuilder<K, V, R, T, C> action(R name) {
-        final ActionDefBuilder<K, V, R, T, C> ab = new ActionDefBuilder<>(workflow, defaultName, name);
+    public ActionDefBuilder<K, V, I, R, T, C> action(R name) {
+        final ActionDefBuilder<K, V, I, R, T, C> ab = new ActionDefBuilder<>(workflow, defaultName, name);
         pendingActionBuilders.put(name, ab);
         return ab;
     }

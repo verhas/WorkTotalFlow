@@ -19,15 +19,16 @@ import java.util.stream.Stream;
  *
  * @param <K> see {@link Workflow} for documentation
  * @param <V> see {@link Workflow} for documentation
+ * @param <I> see {@link Workflow} for documentation
  * @param <R> see {@link Workflow} for documentation
  * @param <T> see {@link Workflow} for documentation
  * @param <C> see {@link Workflow} for documentation
  */
-public class ActionUse<K, V, R, T, C> implements Action<K, V, R, T, C> {
-    final ActionDef<K, V, R, T, C> actionDef;
-    private final Step<K, V, R, T, C> step;
+public class ActionUse<K, V, I, R, T, C> implements Action<K, V, I, R, T, C> {
+    final ActionDef<K, V, I, R, T, C> actionDef;
+    private final Step<K, V, I, R, T, C> step;
     private final boolean auto;
-    private Result<K, V, R, T, C> autoResult;
+    private Result<K, V, I, R, T, C> autoResult;
     private Map<K, V> parameters;
     private Parameters<K, V> merged;
 
@@ -38,7 +39,7 @@ public class ActionUse<K, V, R, T, C> implements Action<K, V, R, T, C> {
      * @param step      the step from which this action starts from
      * @param actionDef the definition of the action
      */
-    private ActionUse(Step<K, V, R, T, C> step, ActionDef<K, V, R, T, C> actionDef) {
+    private ActionUse(Step<K, V, I, R, T, C> step, ActionDef<K, V, I, R, T, C> actionDef) {
         this(step, actionDef, null, false);
     }
 
@@ -50,7 +51,7 @@ public class ActionUse<K, V, R, T, C> implements Action<K, V, R, T, C> {
      * @param parameters the parameters of the action. Note that the {@link ActionDef} can also have parameters and the
      *                   parameters of the action are the merge of the two.
      */
-    ActionUse(Step<K, V, R, T, C> step, ActionDef<K, V, R, T, C> actionDef, Parameters<K, V> parameters) {
+    ActionUse(Step<K, V, I, R, T, C> step, ActionDef<K, V, I, R, T, C> actionDef, Parameters<K, V> parameters) {
         this(step, actionDef, parameters, false);
     }
 
@@ -63,7 +64,7 @@ public class ActionUse<K, V, R, T, C> implements Action<K, V, R, T, C> {
      *                   autoresult. The model does not even use a result in this case, but the implementation is
      *                   that there is an autoResult which is used if there is no other source of result.
      */
-    ActionUse(Step<K, V, R, T, C> step, ActionDef<K, V, R, T, C> actionDef, Parameters<K, V> parameters, Result<K, V, R, T, C> autoResult) {
+    ActionUse(Step<K, V, I, R, T, C> step, ActionDef<K, V, I, R, T, C> actionDef, Parameters<K, V> parameters, Result<K, V, I, R, T, C> autoResult) {
         this(step, actionDef, parameters, true);
         this.autoResult = autoResult;
     }
@@ -77,7 +78,7 @@ public class ActionUse<K, V, R, T, C> implements Action<K, V, R, T, C> {
      * @param auto       true if the action has to be executed automatically. (In that case there can not be any result, the
      *                   result is "autoResult" (see {@link #ActionUse(Step, ActionDef, Parameters, Result)})
      */
-    private ActionUse(Step<K, V, R, T, C> step, ActionDef<K, V, R, T, C> actionDef, Parameters<K, V> parameters, boolean auto) {
+    private ActionUse(Step<K, V, I, R, T, C> step, ActionDef<K, V, I, R, T, C> actionDef, Parameters<K, V> parameters, boolean auto) {
         this.step = step;
         this.actionDef = actionDef;
         this.merged = new MergedParameters<>(parameters, actionDef.parameters);
@@ -90,7 +91,7 @@ public class ActionUse<K, V, R, T, C> implements Action<K, V, R, T, C> {
     }
 
     @Override
-    public Step<K, V, R, T, C> getStep() {
+    public Step<K, V, I, R, T, C> getStep() {
         return step;
     }
 
@@ -137,7 +138,7 @@ public class ActionUse<K, V, R, T, C> implements Action<K, V, R, T, C> {
      * @throws ValidatorFailed  see the documentation of the interface {@link Action}
      */
     @Override
-    public void performPost(T transientObject, Parameters<K, V> userInput) throws ValidatorFailed {
+    public void performPost(T transientObject, I userInput) throws ValidatorFailed {
 
         validatePostAndMerge(transientObject, userInput);
         executeAutoActions();
@@ -150,17 +151,16 @@ public class ActionUse<K, V, R, T, C> implements Action<K, V, R, T, C> {
      * @throws ValidatorFailed see the documentation of the interface {@link Action}
      */
     private void executeAutoActions() throws ValidatorFailed {
-        Set<Step<K, V, R, T, C>> visitedSteps = new HashSet<>();
+        Set<Step<K, V, I, R, T, C>> visitedSteps = new HashSet<>();
         T transientObject;
-        Action<K, V, R, T, C> autoAction;
-        Collection<Action<K, V, R, T, C>> actions;
-        int limitCounter = 0;
+        Action<K, V, I, R, T, C> autoAction;
+        Collection<Action<K, V, I, R, T, C>> actions;
         while (workflowIsInASingleStep() &&
                 (autoAction = oneSingleAutoStepFromThere()) != null) {
-            Step<K, V, R, T, C> visitedStep = autoAction.getStep();
+            Step<K, V, I, R, T, C> visitedStep = autoAction.getStep();
             checkInfiniteLoop(visitedSteps, visitedStep);
             transientObject = autoAction.performPre();
-            ((ActionUse<K, V, R, T, C>) autoAction).validatePostAndMerge(transientObject, null);
+            ((ActionUse<K, V, I, R, T, C>) autoAction).validatePostAndMerge(transientObject, null);
         }
     }
 
@@ -171,7 +171,7 @@ public class ActionUse<K, V, R, T, C> implements Action<K, V, R, T, C> {
      * @param visitedSteps the set of the steps that we have already visited during this auto action traversal
      * @param visitedStep the current step from which we want to step forward
      */
-    private void checkInfiniteLoop(Set<Step<K, V, R, T, C>> visitedSteps, Step<K, V, R, T, C> visitedStep) {
+    private void checkInfiniteLoop(Set<Step<K, V, I, R, T, C>> visitedSteps, Step<K, V, I, R, T, C> visitedStep) {
         if (visitedSteps.contains(visitedStep)) {
             throw new IllegalStateException("Probably infinite loop in auto actions");
         }
@@ -185,15 +185,15 @@ public class ActionUse<K, V, R, T, C> implements Action<K, V, R, T, C> {
      * @return the action to be executed automatically or null if there is no such action or there are more than one
      * actions (even if some of them is auto).
      */
-    private Action<K, V, R, T, C> oneSingleAutoStepFromThere() {
+    private Action<K, V, I, R, T, C> oneSingleAutoStepFromThere() {
         return actionsStream().limit(2).collect(Collectors.collectingAndThen(Collectors.toList(),
-                (List<Action<K, V, R, T, C>> list) ->
+                (List<Action<K, V, I, R, T, C>> list) ->
                         list.size() == 1 && list.get(0).isAuto() ? list.get(0) : null
         ));
     }
 
-    private Stream<Action<K, V, R, T, C>> actionsStream() {
-        final Optional<Step<K, V, R, T, C>> step;
+    private Stream<Action<K, V, I, R, T, C>> actionsStream() {
+        final Optional<Step<K, V, I, R, T, C>> step;
         return (step = getStep().getWorkflow().getSteps().stream().findAny()).isPresent() ?
                 step.get().getActions() : Stream.empty();
     }
@@ -202,19 +202,19 @@ public class ActionUse<K, V, R, T, C> implements Action<K, V, R, T, C> {
         return getStep().getWorkflow().getSteps().size() == 1;
     }
 
-    private void validatePostAndMerge(T transientObject, Parameters<K, V> userInput) throws ValidatorFailed {
+    private void validatePostAndMerge(T transientObject, I userInput) throws ValidatorFailed {
         if (actionDef.validator != null
                 && !actionDef.validator.test(this, transientObject, userInput)) {
             throw new ValidatorFailed();
         }
 
-        final Result<K, V, R, T, C> result;
+        final Result<K, V, I, R, T, C> result;
         if (actionDef.post != null) {
             result = actionDef.post.apply(this, transientObject, userInput);
         } else {
             result = autoResult;
         }
-        Collection<Step<K, V, R, T, C>> steps = result.getSteps();
+        Collection<Step<K, V, I, R, T, C>> steps = result.getSteps();
         mergeSteps(steps);
     }
 
@@ -226,9 +226,9 @@ public class ActionUse<K, V, R, T, C> implements Action<K, V, R, T, C> {
      *
      * @param steps that replace the current workflow the workflow is in
      */
-    private void mergeSteps(Collection<? extends Step<K, V, R, T, C>> steps) {
-        Set<Step<K, V, R, T, C>> stepSet = new HashSet<>();
-        Collection<? extends Step<K, V, R, T, C>> sourceSteps = getStep().getWorkflow().getSteps();
+    private void mergeSteps(Collection<? extends Step<K, V, I, R, T, C>> steps) {
+        Set<Step<K, V, I, R, T, C>> stepSet = new HashSet<>();
+        Collection<? extends Step<K, V, I, R, T, C>> sourceSteps = getStep().getWorkflow().getSteps();
         if (sourceSteps != null) {
             stepSet.addAll(sourceSteps);
             stepSet.remove(step);
@@ -238,9 +238,9 @@ public class ActionUse<K, V, R, T, C> implements Action<K, V, R, T, C> {
     }
 
     @Override
-    public void join(Collection<Step<K, V, R, T, C>> steps) {
-        final Collection<Step<K, V, R, T, C>> stepSet = new HashSet<>();
-        final Workflow<K, V, R, T, C> workflow = getStep().getWorkflow();
+    public void join(Collection<Step<K, V, I, R, T, C>> steps) {
+        final Collection<Step<K, V, I, R, T, C>> stepSet = new HashSet<>();
+        final Workflow<K, V, I, R, T, C> workflow = getStep().getWorkflow();
         stepSet.addAll(workflow.getSteps());
         stepSet.removeAll(steps);
         workflow.setSteps(stepSet);

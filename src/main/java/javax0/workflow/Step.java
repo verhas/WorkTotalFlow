@@ -8,18 +8,19 @@ import java.util.stream.Stream;
  *
  * @param <K> see {@link Workflow} for documentation
  * @param <V> see {@link Workflow} for documentation
+ * @param <I> see {@link Workflow} for documentation
  * @param <R> see {@link Workflow} for documentation
  * @param <T> see {@link Workflow} for documentation
  * @param <C> see {@link Workflow} for documentation
  */
-public interface Step<K, V, R, T, C> extends Named<R>, HasParameters<K,V> {
+public interface Step<K, V, I, R, T, C> extends Named<R>, HasParameters<K,V> {
 
     /**
      * Get the workflow instance that this step belongs to.
      *
      * @return the workflow
      */
-    Workflow<K, V, R, T, C> getWorkflow();
+    Workflow<K, V, I, R, T, C> getWorkflow();
 
     /**
      * Get the actions that can be performed from this step. The returned stream
@@ -27,7 +28,7 @@ public interface Step<K, V, R, T, C> extends Named<R>, HasParameters<K,V> {
      *
      * @return the collection of executable actions
      */
-    default Stream<Action<K, V, R, T, C>> getActions() {
+    default Stream<Action<K, V, I, R, T, C>> getActions() {
         return getActions(a -> true);
     }
 
@@ -48,5 +49,5 @@ public interface Step<K, V, R, T, C> extends Named<R>, HasParameters<K,V> {
      * @param p predicate to filter the actions.
      * @return the filtered stream of steps.
      */
-    Stream<Action<K, V, R, T, C>> getActions(Predicate<Action<K, V, R, T, C>> p);
+    Stream<Action<K, V, I, R, T, C>> getActions(Predicate<Action<K, V, I, R, T, C>> p);
 }

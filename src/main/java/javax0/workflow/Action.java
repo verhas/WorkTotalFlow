@@ -11,11 +11,12 @@ import java.util.function.Supplier;
  *
  * @param <K> see {@link Workflow} for documentation
  * @param <V> see {@link Workflow} for documentation
+ * @param <I> see {@link Workflow} for documentation
  * @param <R> see {@link Workflow} for documentation
  * @param <T> see {@link Workflow} for documentation
  * @param <C> see {@link Workflow} for documentation
  */
-public interface Action<K, V, R, T, C> extends Named<R>, HasParameters<K, V> {
+public interface Action<K, V, I, R, T, C> extends Named<R>, HasParameters<K, V> {
 
     /**
      * When an action is automatic it is executed immediately without waiting from external trigger. Note that this
@@ -32,7 +33,7 @@ public interface Action<K, V, R, T, C> extends Named<R>, HasParameters<K, V> {
      *
      * @return the step this action can be executed from
      */
-    Step<K, V, R, T, C> getStep();
+    Step<K, V, I, R, T, C> getStep();
 
     /**
      * @return true if the action can be processed. This usually true when the condition
@@ -71,7 +72,7 @@ public interface Action<K, V, R, T, C> extends Named<R>, HasParameters<K, V> {
      * @param key the identifier/name of the result.
      * @return the supplier that will upon calling {@link Supplier#get()} return the result.
      */
-    default Supplier<? extends Result<K, V, R, T, C>> result(R key) {
+    default Supplier<? extends Result<K, V, I, R, T, C>> result(R key) {
         return getStep().getWorkflow().result(this, key);
     }
 
@@ -124,7 +125,7 @@ public interface Action<K, V, R, T, C> extends Named<R>, HasParameters<K, V> {
      * @param userInput       the user-input that was gathered after calling pre-function
      * @throws ValidatorFailed if the validation has failed
      */
-    void performPost(T transientObject, Parameters<K, V> userInput)
+    void performPost(T transientObject, I userInput)
             throws ValidatorFailed;
 
     /**
@@ -152,9 +153,9 @@ public interface Action<K, V, R, T, C> extends Named<R>, HasParameters<K, V> {
      *
      * @param steps the workflow to join.
      */
-    default void join(Collection<Step<K, V, R, T, C>> steps) {
-        final Collection<Step<K, V, R, T, C>> stepSet = new HashSet<>();
-        final Workflow<K, V, R, T, C> workflow = getStep().getWorkflow();
+    default void join(Collection<Step<K, V, I, R, T, C>> steps) {
+        final Collection<Step<K, V, I, R, T, C>> stepSet = new HashSet<>();
+        final Workflow<K, V, I, R, T, C> workflow = getStep().getWorkflow();
         stepSet.addAll(workflow.getSteps());
         stepSet.removeAll(steps);
         workflow.setSteps(stepSet);

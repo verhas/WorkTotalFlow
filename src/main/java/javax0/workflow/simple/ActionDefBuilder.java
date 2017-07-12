@@ -10,18 +10,19 @@ import javax0.workflow.Workflow;
  *
  * @param <K> see {@link Workflow} for documentation
  * @param <V> see {@link Workflow} for documentation
+ * @param <I> see {@link Workflow} for documentation
  * @param <R> see {@link Workflow} for documentation
  * @param <T> see {@link Workflow} for documentation
  * @param <C> see {@link Workflow} for documentation
  */
-public class ActionDefBuilder<K, V, R, T, C> extends ParametersBuilder<ActionDefBuilder<K, V, R, T, C>, K, V> {
+public class ActionDefBuilder<K, V, I, R, T, C> extends ParametersBuilder<ActionDefBuilder<K, V, I, R, T, C>, K, V> {
     final R name;
-    private Functions.Pre<K, V, R, T, C> pre = action -> null;
-    private Functions.Post<K, V, R, T, C> post;
-    private Functions.Condition<K, V, R, T, C> condition = action -> true;
-    private Functions.Validator<K, V, R, T, C> validator = (action, t, user) -> true;
+    private Functions.Pre<K, V, I, R, T, C> pre = action -> null;
+    private Functions.Post<K, V, I, R, T, C> post;
+    private Functions.Condition<K, V, I, R, T, C> condition = action -> true;
+    private Functions.Validator<K, V, I, R, T, C> validator = (action, t, user) -> true;
 
-    ActionDefBuilder(Workflow<K, V, R, T, C> workflow, R defaultResult, R name) {
+    ActionDefBuilder(Workflow<K, V, I, R, T, C> workflow, R defaultResult, R name) {
         this.name = name;
         post = (action, t, user) -> workflow.result(action, defaultResult).get();
     }
@@ -32,8 +33,8 @@ public class ActionDefBuilder<K, V, R, T, C> extends ParametersBuilder<ActionDef
      *
      * @param actionDefFactory the factory to use for the creation of the {@link ActionDef}
      */
-    void build(ActionDefFactory<K, V, R, T, C> actionDefFactory) {
-        ActionDef<K, V, R, T, C> def = actionDefFactory.get(name);
+    void build(ActionDefFactory<K, V, I, R, T, C> actionDefFactory) {
+        ActionDef<K, V, I, R, T, C> def = actionDefFactory.get(name);
         def.condition = condition;
         def.parameters = parameters::get;
         def.post = post;
@@ -47,7 +48,7 @@ public class ActionDefBuilder<K, V, R, T, C> extends ParametersBuilder<ActionDef
      * @param validator the validator
      * @return this to chain fluent API
      */
-    public ActionDefBuilder<K, V, R, T, C> validator(Functions.Validator<K, V, R, T, C> validator) {
+    public ActionDefBuilder<K, V, I, R, T, C> validator(Functions.Validator<K, V, I, R, T, C> validator) {
         this.validator = validator;
         return this;
     }
@@ -58,7 +59,7 @@ public class ActionDefBuilder<K, V, R, T, C> extends ParametersBuilder<ActionDef
      * @param condition the condition
      * @return this to chain fluent API
      */
-    public ActionDefBuilder<K, V, R, T, C> condition(Functions.Condition<K, V, R, T, C> condition) {
+    public ActionDefBuilder<K, V, I, R, T, C> condition(Functions.Condition<K, V, I, R, T, C> condition) {
         this.condition = condition;
         return this;
     }
@@ -68,7 +69,7 @@ public class ActionDefBuilder<K, V, R, T, C> extends ParametersBuilder<ActionDef
      * @param pre the pre function
      * @return this to chain fluent API
      */
-    public ActionDefBuilder<K, V, R, T, C> preFunction(Functions.Pre<K, V, R, T, C> pre) {
+    public ActionDefBuilder<K, V, I, R, T, C> preFunction(Functions.Pre<K, V, I, R, T, C> pre) {
         this.pre = pre;
         return this;
     }
@@ -78,7 +79,7 @@ public class ActionDefBuilder<K, V, R, T, C> extends ParametersBuilder<ActionDef
      * @param post the pre function
      * @return this to chain fluent API
      */
-    public ActionDefBuilder<K, V, R, T, C> postFunction(Functions.Post<K, V, R, T, C> post) {
+    public ActionDefBuilder<K, V, I, R, T, C> postFunction(Functions.Post<K, V, I, R, T, C> post) {
         this.post = post;
         return this;
     }

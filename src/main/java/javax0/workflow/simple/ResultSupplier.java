@@ -14,14 +14,15 @@ import java.util.function.Supplier;
  *
  * @param <K> see {@link Workflow} for documentation
  * @param <V> see {@link Workflow} for documentation
+ * @param <I> see {@link Workflow} for documentation
  * @param <R> see {@link Workflow} for documentation
  * @param <T> see {@link Workflow} for documentation
  * @param <C> see {@link Workflow} for documentation
  */
-class ResultSupplier<K, V, R, T, C> {
-    private final Map<SupplierTriuple<K, V, R, T, C>, Result<K, V, R, T, C>> stepMap = new HashMap<>();
+class ResultSupplier<K, V, I, R, T, C> {
+    private final Map<SupplierTriuple<K, V, I, R, T, C>, Result<K, V, I, R, T, C>> stepMap = new HashMap<>();
 
-    private SupplierTriuple<K, V, R, T, C> key(Step<K, V, R, T, C> step, ActionDef<K, V, R, T, C> actionDef, R name) {
+    private SupplierTriuple<K, V, I, R, T, C> key(Step<K, V, I, R, T, C> step, ActionDef<K, V, I, R, T, C> actionDef, R name) {
         return SupplierTriuple.tuple(step, actionDef, name);
     }
 
@@ -35,10 +36,10 @@ class ResultSupplier<K, V, R, T, C> {
      *               object level a result belongs to a name and an action together. Two results may have the same name
      *               and still be two different results if they belong to different actions.
      * @param name   the name of the result.
-     * @return
+     * @return returns the supplier that will get the result
      */
-    Supplier<Result<K, V, R, T, C>> supplier(Action<K, V, R, T, C> action, R name) {
-        return () -> stepMap.get(key(action.getStep(), ((ActionUse<K, V, R, T, C>) action).actionDef, name));
+    Supplier<Result<K, V, I, R, T, C>> supplier(Action<K, V, I, R, T, C> action, R name) {
+        return () -> stepMap.get(key(action.getStep(), ((ActionUse<K, V, I, R, T, C>) action).actionDef, name));
     }
 
     /**
@@ -49,8 +50,8 @@ class ResultSupplier<K, V, R, T, C> {
      * @param name      the name of the result
      * @param result    the result object to store in the map.
      */
-    void put(Step<K, V, R, T, C> step, ActionDef<K, V, R, T, C> actionDef, R name, Result<K, V, R, T, C> result) {
-        SupplierTriuple<K, V, R, T, C> complexKey = key(step, actionDef, name);
+    void put(Step<K, V, I, R, T, C> step, ActionDef<K, V, I, R, T, C> actionDef, R name, Result<K, V, I, R, T, C> result) {
+        SupplierTriuple<K, V, I, R, T, C> complexKey = key(step, actionDef, name);
         if (stepMap.containsKey(complexKey)) {
             throw new IllegalArgumentException(
                     String.format("Mapping (s: '%s', a:'%s',r:'%s') -> supplier already exists.", step, actionDef, name));

@@ -7,10 +7,12 @@ import java.util.function.Supplier;
  * This interface defines the methods that are available to manage the workflow
  * of an item.
  *
- * @param <K> in a workflow user input is presented as Parameters that have K,V pairs. This is the type parameter for
- *            the keys used in Parameters.
- * @param <V> in a workflow user input is presented as Parameters that have K,V pairs. This is the type parameter for
- *            the values used in Parameters
+ * @param <K> in a workflow parameters are presented as Parameters that have K,V pairs. These parameters are not used
+ *           by the workflow itself but are available to the different {@link Functions}. These parameters are
+ *           usually defined in some configuration that the actual Workflow implementation reads.
+ *           This is the type parameter for the keys used in Parameters.
+ * @param <V> This is the type parameter for the values used in Parameters
+ * @param <I> The object type that contains the user input during the workflow.
  * @param <R> steps, actions and results in a workflow have identifier. This helps the higher level handling of the workflow
  *            though such ID is not needed for the internal working and execution of workflow. R is the type parameter
  *            for such an ID. In most of the practical applications we expect that this type parameter will be simple
@@ -21,7 +23,7 @@ import java.util.function.Supplier;
  *            workflow can have exactly one context. The context is not used by the workflow engine, it is there to be
  *            available for pre, post functions, conditions and validators.
  */
-public interface Workflow<K, V, R, T, C> {
+public interface Workflow<K, V, I, R, T, C> {
 
     /**
      * <p>
@@ -46,17 +48,17 @@ public interface Workflow<K, V, R, T, C> {
      * @param key    the name/id of the result
      * @return a supplier that will give the result
      */
-    Supplier<Result<K, V, R, T, C>> result(Action<K, V, R, T, C> action, R key);
+    Supplier<Result<K, V, I, R, T, C>> result(Action<K, V, I, R, T, C> action, R key);
 
     /**
      * Get the steps that the workflow is currently in.
      */
-    Collection<Step<K, V, R, T, C>> getSteps();
+    Collection<Step<K, V, I, R, T, C>> getSteps();
 
     /**
      * Set the steps that the workflow is currently in.
      */
-    void setSteps(Collection<Step<K, V, R, T, C>> steps);
+    void setSteps(Collection<Step<K, V, I, R, T, C>> steps);
 
     /**
      * Get the context object that this workflow holds.
